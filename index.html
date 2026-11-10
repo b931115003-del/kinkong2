@@ -3,175 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>金剛爬塔 — 回合對戰</title>
+<title>金剛爬塔 — 線上對戰</title>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#09091a;--gold:#f5a623;--teal:#00c8f0;--red:#e94560;--green:#06d6a0;--purple:#9060d0;
-  --text:#e0e0f0;--text2:#6060a0;
-}
+:root{--bg:#09091a;--gold:#f5a623;--teal:#00c8f0;--red:#e94560;--green:#06d6a0;--text:#e0e0f0;--text2:#6060a0;}
 body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,#180838 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,#081828 0%,transparent 50%);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:0 8px 14px;overflow-x:hidden;}
-
-/* ══ BTN ══ */
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer;transition:all .17s;border:1px solid #282858;color:#c0c0e8;background:linear-gradient(155deg,#1e1e40,#111128);box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05),inset 0 -1px 0 rgba(0,0,0,.4);}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;font-size:13px;font-weight:600;border-radius:9px;cursor:pointer;transition:all .17s;border:1px solid #282858;color:#c0c0e8;background:linear-gradient(155deg,#1e1e40,#111128);box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);}
 .btn:hover{border-color:rgba(0,200,240,.4);color:var(--teal);transform:translateY(-2px);}
 .btn:active{transform:translateY(1px);}
-.btn-red{background:linear-gradient(135deg,#e94560,#c02b48 55%,#8e1830);border:none;color:#fff;box-shadow:0 3px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12),inset 0 -2px 0 rgba(0,0,0,.3);}
+.btn-red{background:linear-gradient(135deg,#e94560,#8e1830);border:none;color:#fff;box-shadow:0 3px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);}
 .btn-red:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(233,69,96,.55);}
 .btn-green{background:linear-gradient(135deg,#06b060,#047a40);border:none;color:#fff;box-shadow:0 3px 16px rgba(6,160,80,.35),inset 0 1px 0 rgba(255,255,255,.12);}
 .btn-green:hover{transform:translateY(-2px);}
-.btn-gold{background:linear-gradient(135deg,#c07010,#905008);border:none;color:#fff;box-shadow:0 3px 16px rgba(192,112,16,.35),inset 0 1px 0 rgba(255,255,255,.12);}
-.btn-gold:hover{transform:translateY(-2px);}
 
 /* ══ LOBBY ══ */
-#lobbyScreen{width:100%;max-width:480px;margin-top:12px;}
-.lobby-card{background:linear-gradient(145deg,#141430,#0a0a1e);border:1px solid #252560;border-radius:18px;padding:26px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.7);}
-.ltitle{font-size:24px;font-weight:900;color:var(--gold);letter-spacing:2px;text-shadow:0 0 20px rgba(245,166,35,.4);margin-bottom:3px;}
-.lsub{font-size:12.5px;color:var(--text2);margin-bottom:18px;line-height:1.5;}
-.field-row{display:flex;align-items:center;gap:8px;margin-bottom:11px;}
-.field-label{font-size:12px;color:var(--text2);flex-shrink:0;width:52px;}
-.field-inp{flex:1;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:8px 11px;font-size:13px;color:var(--text);font-family:inherit;outline:none;}
-.field-inp:focus{border-color:rgba(100,80,200,.5);}
-.rule-box{background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.2);border-radius:12px;padding:14px 16px;margin:14px 0;}
-.rule-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;}
-.rule-opts{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
-.rule-opt{padding:9px 10px;border-radius:9px;cursor:pointer;border:1px solid #202050;background:#0e0e28;transition:all .17s;text-align:center;}
-.rule-opt:hover{border-color:rgba(0,200,240,.35);}
-.rule-opt.sel{border-color:var(--teal);background:rgba(0,200,240,.1);box-shadow:0 0 0 1px rgba(0,200,240,.2);}
-.rule-opt-title{font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.rule-opt-desc{font-size:10.5px;color:var(--text2);line-height:1.4;}
-.round-sel{display:flex;align-items:center;gap:8px;margin-top:10px;}
-.round-btn{width:34px;height:34px;border-radius:8px;border:1px solid #202050;background:#0e0e28;color:var(--text);font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.round-btn:hover{border-color:var(--teal);color:var(--teal);}
-.round-num{font-size:22px;font-weight:900;color:var(--gold);min-width:28px;text-align:center;}
-.round-label{font-size:11px;color:var(--text2);}
-.invite-box{margin-top:14px;padding:12px 14px;background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);border-radius:10px;display:none;}
-.invite-link{font-size:11px;color:var(--teal);font-family:monospace;word-break:break-all;margin:5px 0 8px;line-height:1.5;}
-.waiting{display:flex;align-items:center;gap:8px;padding:9px 12px;background:rgba(6,214,160,.06);border:1px solid rgba(6,214,160,.2);border-radius:9px;margin-top:10px;}
+#lobby{width:100%;max-width:420px;margin-top:20px;}
+.card{background:linear-gradient(145deg,#141430,#0a0a1e);border:1px solid #252560;border-radius:18px;padding:26px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.7);}
+.ltitle{font-size:26px;font-weight:900;color:var(--gold);text-align:center;letter-spacing:2px;text-shadow:0 0 20px rgba(245,166,35,.4);}
+.lsub{font-size:12.5px;color:var(--text2);text-align:center;margin:4px 0 20px;line-height:1.5;}
+.field{display:flex;align-items:center;gap:8px;margin-bottom:11px;}
+.field label{font-size:12px;color:var(--text2);flex-shrink:0;width:48px;}
+.field input{flex:1;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;outline:none;}
+.field input:focus{border-color:rgba(100,80,200,.5);box-shadow:0 0 0 2px rgba(100,80,200,.1);}
+.sep{display:flex;align-items:center;gap:10px;margin:16px 0;}
+.sep-line{flex:1;height:1px;background:#1e1e40;}
+.sep-txt{font-size:11px;color:#2a2a60;letter-spacing:1px;}
+.lobby-btns{display:flex;flex-direction:column;gap:9px;}
+.lbtn{width:100%;padding:13px;font-size:14px;font-weight:800;border-radius:12px;border:none;cursor:pointer;transition:all .17s;letter-spacing:.4px;}
+.lbtn:hover{transform:translateY(-2px);}
+
+/* invite/join box */
+.box{margin-top:14px;padding:14px 16px;border-radius:12px;}
+.box-green{background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);}
+.box-teal{background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.2);}
+.box-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;}
+.invite-link{font-size:11px;color:var(--teal);font-family:monospace;word-break:break-all;padding:8px 10px;background:#07071e;border:1px solid rgba(0,200,240,.2);border-radius:7px;margin:6px 0;cursor:pointer;}
+.waiting{display:flex;align-items:center;gap:8px;margin-top:10px;}
 .wdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.code-inp{width:100%;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:4px;text-align:center;font-family:monospace;outline:none;margin-bottom:8px;}
+.code-inp:focus{border-color:rgba(0,200,240,.5);}
 
 /* ══ GAME ══ */
-#gameScreen{display:none;width:100%;max-width:560px;}
-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;gap:8px;}
-.logo{font-size:17px;font-weight:900;letter-spacing:2px;color:var(--gold);text-shadow:0 0 16px rgba(245,166,35,.35);}
-.hdr-btns{display:flex;gap:5px;}
+#game{display:none;width:100%;max-width:560px;}
+header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;}
+.logo{font-size:17px;font-weight:900;letter-spacing:2px;color:var(--gold);}
 
-/* Score header */
-.score-header{width:100%;display:flex;align-items:center;gap:6px;margin-bottom:6px;}
-.player-card{flex:1;padding:8px 11px;border-radius:11px;position:relative;overflow:hidden;}
-.pc-p1{background:linear-gradient(135deg,rgba(233,69,96,.14),rgba(233,69,96,.04));border:1px solid rgba(233,69,96,.3);}
-.pc-p2{background:linear-gradient(135deg,rgba(0,200,240,.1),rgba(0,200,240,.04));border:1px solid rgba(0,200,240,.2);}
-.pc-name{font-size:11px;font-weight:700;letter-spacing:.5px;margin-bottom:3px;}
+/* Score bar */
+.score-bar{width:100%;display:flex;align-items:center;gap:6px;margin-bottom:5px;}
+.pc{flex:1;padding:8px 11px;border-radius:11px;}
+.pc-me{background:linear-gradient(135deg,rgba(233,69,96,.14),rgba(233,69,96,.04));border:1px solid rgba(233,69,96,.3);}
+.pc-opp{background:linear-gradient(135deg,rgba(0,200,240,.1),rgba(0,200,240,.04));border:1px solid rgba(0,200,240,.2);}
+.pc-name{font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:3px;}
 .pc-score{font-size:20px;font-weight:900;line-height:1;}
-.pc-rounds{font-size:10px;color:var(--text2);margin-top:2px;display:flex;gap:3px;flex-wrap:wrap;}
-.round-pip{width:9px;height:9px;border-radius:50%;background:#1a1a40;border:1px solid #303060;}
-.round-pip.win{background:var(--gold);border-color:var(--gold);box-shadow:0 0 5px rgba(245,166,35,.4);}
-.round-pip.loss{background:#e94560;border-color:#e94560;}
-.pc-active{position:absolute;right:8px;top:8px;width:7px;height:7px;border-radius:50%;}
-.pc-active.on{background:var(--green);box-shadow:0 0 8px rgba(6,214,160,.6);animation:pulse 1.5s infinite;}
-.pc-active.off{background:#2a2a60;}
-
-.vs-center{display:flex;flex-direction:column;align-items:center;gap:3px;padding:0 4px;}
+.pc-lives{font-size:12px;margin-top:2px;}
+.pc-status{font-size:9px;color:var(--text2);margin-top:1px;}
+.live-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;}
+.vs-mid{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 3px;}
 .vs-txt{font-size:10px;font-weight:900;color:#282858;letter-spacing:2px;}
-.cur-round-txt{font-size:9px;color:var(--text2);text-align:center;white-space:nowrap;}
 
-/* Turn badge */
-.turn-banner{width:100%;text-align:center;padding:7px 12px;border-radius:10px;font-size:13px;font-weight:700;letter-spacing:.5px;margin-bottom:5px;transition:all .3s;}
-.tb-p1{background:rgba(233,69,96,.12);border:1px solid rgba(233,69,96,.35);color:#ff8090;}
-.tb-p2{background:rgba(0,200,240,.1);border:1px solid rgba(0,200,240,.3);color:var(--teal);}
-.tb-wait{background:rgba(255,255,255,.04);border:1px solid #1a1a3a;color:var(--text2);}
+/* height bars */
+.hbars{width:100%;display:flex;gap:5px;margin:3px 0 5px;}
+.hb-wrap{flex:1;display:flex;align-items:center;gap:5px;}
+.hb-label{font-size:9px;width:22px;flex-shrink:0;}
+.hb-bg{flex:1;height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;}
+.hb{height:100%;border-radius:2px;transition:width .2s;}
+.hb-me{background:linear-gradient(90deg,var(--red),#c02040);}
+.hb-opp{background:linear-gradient(90deg,var(--teal),#0860a0);}
 
-/* Canvas */
+/* canvas */
 .canvas-wrap{position:relative;width:100%;}
-#gameCanvas{display:block;border-radius:12px;image-rendering:pixelated;box-shadow:0 8px 40px rgba(0,0,0,.7),0 0 0 2px rgba(255,255,255,.04);width:100%;max-width:560px;}
-#gameCanvas.p1-turn{box-shadow:0 8px 40px rgba(233,69,96,.2),0 0 0 2px rgba(233,69,96,.4);}
-#gameCanvas.p2-turn{box-shadow:0 8px 40px rgba(0,200,240,.15),0 0 0 2px rgba(0,200,240,.35);}
-
-/* Overlay */
-.overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(8px);background:rgba(5,5,20,.9);}
-.overlay.show{opacity:1;pointer-events:all;}
-.ov-em{font-size:52px;line-height:1;}
-.ov-ttl{font-size:22px;font-weight:900;letter-spacing:1px;text-align:center;}
-.ov-ttl.gold{color:var(--gold);text-shadow:0 0 20px rgba(245,166,35,.5);}
+#gc{display:block;border-radius:12px;image-rendering:pixelated;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.7),0 0 0 2px rgba(255,255,255,.04);}
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(8px);background:rgba(5,5,20,.9);}
+.ov.show{opacity:1;pointer-events:all;}
+.ov-em{font-size:50px;line-height:1;}
+.ov-ttl{font-size:21px;font-weight:900;text-align:center;}
+.ov-ttl.gold{color:var(--gold);text-shadow:0 0 20px rgba(245,166,35,.4);}
 .ov-ttl.red{color:var(--red);}
 .ov-ttl.teal{color:var(--teal);}
-.ov-sub{font-size:12.5px;color:var(--text2);text-align:center;max-width:260px;line-height:1.5;}
-.ov-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+.ov-sub{font-size:12px;color:var(--text2);text-align:center;max-width:260px;line-height:1.5;}
+.ov-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
 
-/* Height bar */
-.hbar-row{width:100%;display:flex;align-items:center;gap:6px;margin:4px 0;}
-.hbar-label{font-size:9.5px;color:var(--text2);flex-shrink:0;width:30px;}
-.hbar-wrap{flex:1;height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;}
-.hbar{height:100%;border-radius:2px;transition:width .2s;}
-.hbar.p1{background:linear-gradient(90deg,var(--red),#c02040);}
-.hbar.p2{background:linear-gradient(90deg,var(--teal),#0860a0);}
+/* dpad */
+.ctrl{display:flex;align-items:center;justify-content:center;gap:14px;margin:7px 0 3px;}
+.dpw{padding:9px;border-radius:16px;background:linear-gradient(145deg,#111128,#0a0a1a);border:1px solid #1e1e40;box-shadow:0 5px 20px rgba(0,0,0,.55);}
+.dp{display:grid;grid-template-areas:". up ." "left . right";gap:4px;}
+.db{width:52px;height:52px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;color:#9090c8;background:linear-gradient(145deg,#232345,#141432);border:1px solid #2e2e60;box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.45);transition:all .1s;position:relative;overflow:hidden;}
+.db::after{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(to bottom,rgba(255,255,255,.07),transparent);pointer-events:none;}
+.db.up{grid-area:up;border-radius:11px 11px 5px 5px;}
+.db.left{grid-area:left;border-radius:11px 5px 5px 11px;}
+.db.right{grid-area:right;border-radius:5px 11px 11px 5px;}
+.db:active,.db.pressed{color:var(--red);border-color:var(--red);background:linear-gradient(145deg,#180a10,#0e0608);box-shadow:0 1px 3px rgba(0,0,0,.5),0 0 12px rgba(233,69,96,.22),inset 0 2px 5px rgba(0,0,0,.5);transform:scale(.93);}
+.jb{width:54px;height:54px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;background:linear-gradient(135deg,#e94560,#8e1830);border:none;color:#fff;box-shadow:0 4px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.15);}
+.jb:active{transform:scale(.92);}
+.hint{font-size:10px;color:#2a2a56;text-align:center;margin-bottom:4px;}
 
-/* Dpad */
-.ctrl-row{display:flex;align-items:center;justify-content:center;gap:14px;margin:7px 0;}
-.dpad-wrap{padding:9px;border-radius:16px;background:linear-gradient(145deg,#111128,#0a0a1a);border:1px solid #1e1e40;box-shadow:0 5px 20px rgba(0,0,0,.55);}
-.dpad{display:grid;grid-template-areas:". up ." "left . right";gap:4px;}
-.dpad-btn{width:52px;height:52px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;color:#9090c8;background:linear-gradient(145deg,#232345,#141432);border:1px solid #2e2e60;box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.45);transition:all .1s;position:relative;overflow:hidden;}
-.dpad-btn::after{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(to bottom,rgba(255,255,255,.07),transparent);pointer-events:none;}
-.dpad-btn.up{grid-area:up;border-radius:11px 11px 5px 5px;}
-.dpad-btn.left{grid-area:left;border-radius:11px 5px 5px 11px;}
-.dpad-btn.right{grid-area:right;border-radius:5px 11px 11px 5px;}
-.dpad-btn:active,.dpad-btn.pressed{color:var(--red);border-color:var(--red);background:linear-gradient(145deg,#180a10,#0e0608);box-shadow:0 1px 3px rgba(0,0,0,.5),0 0 12px rgba(233,69,96,.22),inset 0 2px 5px rgba(0,0,0,.5);transform:scale(.93);}
-.jump-btn{width:54px;height:54px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;touch-action:manipulation;background:linear-gradient(135deg,#e94560,#8e1830);border:none;color:#fff;box-shadow:0 4px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.15);}
-.jump-btn:active{transform:scale(.92);}
-.ctrl-hint{font-size:10px;color:#2a2a56;text-align:center;}
-
-/* Chat */
-.chat-wrap{width:100%;background:linear-gradient(145deg,#0e0e28,#080818);border:1px solid #1a1a3a;border-radius:12px;overflow:hidden;margin-top:6px;}
+/* chat */
+.chat{background:linear-gradient(145deg,#0e0e28,#080818);border:1px solid #1a1a3a;border-radius:12px;overflow:hidden;margin-top:6px;}
 .chat-hdr{padding:7px 12px 6px;border-bottom:1px solid #161630;display:flex;align-items:center;justify-content:space-between;}
-.chat-hdr-l{display:flex;align-items:center;gap:7px;}
-.c-dot{width:7px;height:7px;border-radius:50%;background:#3a3a68;}
-.c-dot.on{background:var(--green);box-shadow:0 0 6px rgba(6,214,160,.5);animation:pulse 2s infinite;}
-.chat-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);}
-.chat-ontxt{font-size:9.5px;color:#2a2a68;}
+.cdot{width:7px;height:7px;border-radius:50%;background:#3a3a68;flex-shrink:0;}
+.cdot.on{background:var(--green);box-shadow:0 0 6px rgba(6,214,160,.5);animation:pulse 2s infinite;}
 .chat-msgs{height:130px;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:4px;}
 .chat-msgs::-webkit-scrollbar{width:3px;}
 .chat-msgs::-webkit-scrollbar-thumb{background:#1e1e3a;border-radius:2px;}
 .cm{display:flex;flex-direction:column;gap:1px;animation:fu .2s;}
 @keyframes fu{from{opacity:0;transform:translateY(3px);}to{opacity:1;}}
-.cm.me{align-self:flex-end;}.cm.other{align-self:flex-start;}.cm.sys{align-self:center;}
+.cm.me{align-self:flex-end;}.cm.op{align-self:flex-start;}.cm.sy{align-self:center;}
 .cm-meta{display:flex;align-items:center;gap:4px;padding:0 3px;}
 .cm.me .cm-meta{flex-direction:row-reverse;}
 .cm-ava{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
 .cm-name{font-size:9.5px;color:var(--text2);}
 .cm-time{font-size:8.5px;color:#1e1e48;}
-.cm-bubble{padding:6px 10px;font-size:12px;line-height:1.4;word-break:break-word;max-width:220px;}
-.cm.me .cm-bubble{background:linear-gradient(135deg,rgba(233,69,96,.18),rgba(233,69,96,.07));border:1px solid rgba(233,69,96,.2);border-radius:9px 9px 2px 9px;color:#f0b8c0;}
-.cm.other .cm-bubble{background:linear-gradient(135deg,rgba(0,200,240,.1),rgba(0,200,240,.03));border:1px solid rgba(0,200,240,.16);border-radius:9px 9px 9px 2px;color:#a8e0f0;}
-.cm.sys .cm-bubble{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.14);border-radius:7px;font-size:10.5px;color:var(--gold);text-align:center;padding:4px 10px;}
-.cm.ai .cm-bubble{background:linear-gradient(135deg,rgba(144,96,208,.14),rgba(144,96,208,.04));border:1px solid rgba(144,96,208,.18);border-radius:9px 9px 9px 2px;color:#d0b8f8;}
-.typing-row{padding:2px 10px;display:none;}
-.typing-row.show{display:flex;}
-.tdots{display:flex;gap:3px;padding:5px 9px;background:rgba(0,200,240,.08);border:1px solid rgba(0,200,240,.14);border-radius:8px;}
-.td{width:5px;height:5px;border-radius:50%;background:var(--teal);animation:td .9s infinite;}
-.td:nth-child(2){animation-delay:.18s;}.td:nth-child(3){animation-delay:.36s;}
-@keyframes td{0%,80%,100%{opacity:.25;transform:scale(.8);}40%{opacity:1;transform:scale(1.1);}}
+.cm-b{padding:6px 10px;font-size:12px;line-height:1.4;word-break:break-word;max-width:220px;}
+.cm.me .cm-b{background:linear-gradient(135deg,rgba(233,69,96,.18),rgba(233,69,96,.07));border:1px solid rgba(233,69,96,.2);border-radius:9px 9px 2px 9px;color:#f0b8c0;}
+.cm.op .cm-b{background:linear-gradient(135deg,rgba(0,200,240,.1),rgba(0,200,240,.03));border:1px solid rgba(0,200,240,.16);border-radius:9px 9px 9px 2px;color:#a8e0f0;}
+.cm.sy .cm-b{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.14);border-radius:7px;font-size:10.5px;color:var(--gold);text-align:center;padding:4px 10px;}
 .qr-row{display:flex;gap:4px;padding:5px 10px;border-top:1px solid #121228;flex-wrap:wrap;}
 .qr{padding:3px 7px;border-radius:12px;font-size:10.5px;cursor:pointer;border:1px solid #181838;color:var(--text2);background:#0a0a1e;transition:all .14s;}
 .qr:hover{border-color:rgba(233,69,96,.4);color:var(--red);}
 .chat-inp-row{display:flex;gap:5px;padding:6px 10px 8px;border-top:1px solid #121228;}
-.chat-inp{flex:1;background:#07071e;border:1px solid #202050;border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
-.chat-inp:focus{border-color:rgba(100,80,200,.5);}
-.chat-send{padding:7px 12px;border-radius:7px;background:linear-gradient(135deg,#4030a0,#2a1870);border:none;color:#c0b0f0;cursor:pointer;font-size:14px;transition:all .15s;}
-.chat-send:hover{background:linear-gradient(135deg,#5040c0,#3a2890);}
+.cinp{flex:1;background:#07071e;border:1px solid #202050;border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
+.cinp:focus{border-color:rgba(100,80,200,.5);}
+.csend{padding:7px 12px;border-radius:7px;background:linear-gradient(135deg,#4030a0,#2a1870);border:none;color:#c0b0f0;cursor:pointer;font-size:14px;transition:all .15s;}
+.csend:hover{background:linear-gradient(135deg,#5040c0,#3a2890);}
 
-/* Final scoreboard */
-.final-board{width:100%;max-width:400px;margin:0 auto;}
-.final-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:11px;margin-bottom:8px;}
-.final-row.winner{background:linear-gradient(135deg,rgba(245,166,35,.14),rgba(245,166,35,.04));border:1px solid rgba(245,166,35,.4);}
-.final-row.loser{background:rgba(255,255,255,.03);border:1px solid #202040;}
-.final-rank{font-size:28px;line-height:1;}
-.final-info{flex:1;}
-.final-name{font-size:15px;font-weight:800;}
-.final-detail{font-size:11px;color:var(--text2);margin-top:2px;}
-.final-score{font-size:20px;font-weight:900;color:var(--gold);}
-
-/* Toast */
+/* toast */
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);opacity:0;background:linear-gradient(135deg,#141432,#0a0a1e);border:1px solid rgba(245,166,35,.3);border-radius:12px;padding:9px 16px;font-size:12.5px;color:var(--gold);max-width:320px;text-align:center;z-index:999;transition:all .35s;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 </style>
@@ -179,167 +136,156 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 <body>
 
 <!-- ══ LOBBY ══ -->
-<div id="lobbyScreen">
-  <div class="lobby-card">
-    <div style="font-size:36px;text-align:center;margin-bottom:4px;">🦍</div>
-    <div class="ltitle" style="text-align:center;">金剛爬塔</div>
-    <div class="lsub" style="text-align:center;">回合制對戰 · 一個畫面 · 輪流挑戰</div>
+<div id="lobby">
+  <br>
+  <div class="card">
+    <div style="font-size:40px;text-align:center;margin-bottom:5px;">🦍</div>
+    <div class="ltitle">金剛爬塔</div>
+    <div class="lsub">線上對戰版 · 邀請朋友一起玩！</div>
 
-    <div class="field-row"><span class="field-label">玩家一：</span><input class="field-inp" id="p1Nick" placeholder="輸入暱稱…" maxlength="12" value="玩家一"></div>
-    <div class="field-row"><span class="field-label">玩家二：</span><input class="field-inp" id="p2Nick" placeholder="（好友暱稱）" maxlength="12" value="玩家二" id="p2Nick"></div>
+    <div class="field">
+      <label>暱稱</label>
+      <input id="nickInp" placeholder="輸入你的暱稱…" maxlength="12" value="玩家">
+    </div>
 
-    <div class="rule-box">
-      <div class="rule-title">🎮 選擇對戰模式</div>
-      <div class="rule-opts">
-        <div class="rule-opt sel" id="ruleA" onclick="pickRule('A')">
-          <div class="rule-opt-title">交替輪流</div>
-          <div class="rule-opt-desc">每人玩完一局<br>立即換對方</div>
-        </div>
-        <div class="rule-opt" id="ruleB" onclick="pickRule('B')">
-          <div class="rule-opt-title">各打多局</div>
-          <div class="rule-opt-desc">每人連打幾局<br>再換對方</div>
-        </div>
-      </div>
+    <div class="lobby-btns">
+      <!-- 建立房間 -->
+      <button class="lbtn" onclick="createRoom()"
+        style="color:#fff;background:linear-gradient(135deg,#e94560,#8e1830);box-shadow:0 4px 20px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);">
+        🔗 建立房間 · 邀請朋友
+      </button>
 
-      <!-- Round count (for mode B) -->
-      <div id="roundSelRow" style="display:none;margin-top:12px;">
-        <div class="round-sel">
-          <div class="round-label" style="color:var(--text2);font-size:11px;">每人連打</div>
-          <button class="round-btn" onclick="adj(-1)">−</button>
-          <div class="round-num" id="roundNumDisp">3</div>
-          <button class="round-btn" onclick="adj(1)">+</button>
-          <div class="round-label" style="color:var(--text2);font-size:11px;">局</div>
-        </div>
-      </div>
+      <div class="sep"><div class="sep-line"></div><div class="sep-txt">或</div><div class="sep-line"></div></div>
 
-      <!-- Total rounds -->
-      <div style="margin-top:12px;">
-        <div class="round-label" style="color:var(--text2);font-size:11px;margin-bottom:6px;">比賽總回合（每人各打幾輪）</div>
-        <div class="round-sel">
-          <button class="round-btn" onclick="adjTotal(-1)">−</button>
-          <div class="round-num" id="totalRoundDisp">3</div>
-          <button class="round-btn" onclick="adjTotal(1)">+</button>
-          <div class="round-label" style="color:var(--text2);font-size:11px;">輪（共 <span id="totalGamesDisp">6</span> 局）</div>
-        </div>
+      <!-- 加入房間 -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <input class="code-inp" id="codeInp" placeholder="輸入邀請碼" maxlength="8">
+        <button class="lbtn" onclick="joinRoom()"
+          style="color:#fff;background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);">
+          🎮 加入朋友的房間
+        </button>
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:8px;">
-      <button onclick="startLocal()" style="width:100%;padding:13px;font-size:14px;font-weight:800;border-radius:11px;border:none;color:#fff;background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);cursor:pointer;letter-spacing:.5px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">🎮 開始對戰</button>
-      <button onclick="createOnline()" style="width:100%;padding:13px;font-size:14px;font-weight:800;border-radius:11px;border:none;color:#fff;background:linear-gradient(135deg,#e94560,#8e1830);box-shadow:0 4px 20px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);cursor:pointer;letter-spacing:.5px;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">🔗 線上邀請好友</button>
-    </div>
-
-    <div class="invite-box" id="inviteBox">
-      <div style="font-size:11px;color:var(--text2);">📋 把連結傳給好友，他打開後自動加入：</div>
-      <div class="invite-link" id="inviteLinkTxt"></div>
-      <div style="display:flex;gap:7px;">
-        <button class="btn btn-green" style="font-size:11.5px;padding:6px 12px;" onclick="copyLink()">📋 複製</button>
-        <button class="btn" style="font-size:11.5px;padding:6px 12px;" onclick="shareLink()">📤 分享</button>
+    <!-- 建立後顯示邀請資訊 -->
+    <div class="box box-green" id="inviteBox" style="display:none;">
+      <div class="box-title" style="color:var(--green);">📋 傳給朋友</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">邀請碼：</div>
+      <div style="font-size:28px;font-weight:900;color:var(--gold);letter-spacing:6px;text-align:center;padding:8px;background:#07071e;border-radius:8px;border:1px solid rgba(245,166,35,.2);font-family:monospace;" id="roomCodeDisp"></div>
+      <div style="font-size:11px;color:var(--text2);margin:8px 0 4px;">或複製連結：</div>
+      <div class="invite-link" id="inviteLinkDisp" onclick="copyLink()">點擊複製連結</div>
+      <div style="display:flex;gap:7px;margin-top:6px;">
+        <button class="btn btn-green" style="font-size:11.5px;padding:6px 12px;flex:1;" onclick="copyLink()">📋 複製連結</button>
+        <button class="btn" style="font-size:11.5px;padding:6px 12px;flex:1;" onclick="shareLink()">📤 分享</button>
       </div>
-      <div class="waiting" id="waitRow" style="margin-top:10px;">
+      <div class="waiting" id="waitRow">
         <div class="wdot"></div>
-        <div style="font-size:12px;color:var(--green);" id="waitTxt">等待好友加入…</div>
+        <div style="font-size:12px;color:var(--green);" id="waitTxt">等待朋友輸入邀請碼加入…</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ GAME SCREEN ══ -->
-<div id="gameScreen">
+<!-- ══ GAME ══ -->
+<div id="game">
   <header>
     <div class="logo">金剛爬塔 🦍</div>
-    <div class="hdr-btns">
-      <button class="btn" style="font-size:11px;padding:6px 11px;" onclick="toAIComment()">🤖 求評語</button>
-      <button class="btn" style="font-size:11px;padding:6px 11px;" onclick="backLobby()">← 大廳</button>
+    <div style="display:flex;gap:5px;">
+      <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="restartMe()">⟳ 重開</button>
+      <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="backLobby()">← 大廳</button>
     </div>
   </header>
 
-  <!-- Score header -->
-  <div class="score-header">
-    <div class="player-card pc-p1" id="p1Card">
-      <div class="pc-active on" id="p1Dot"></div>
-      <div class="pc-name" style="color:#ff8090;">👤 <span id="p1NameDisp">P1</span></div>
-      <div class="pc-score" style="color:var(--gold);" id="p1ScoreDisp">0</div>
-      <div class="pc-rounds" id="p1Pips"></div>
+  <!-- Score bar -->
+  <div class="score-bar">
+    <div class="pc pc-me">
+      <div class="pc-name" style="color:#ff8090;">
+        <span class="live-dot" style="background:var(--green);box-shadow:0 0 5px rgba(6,214,160,.5);"></span>
+        👤 <span id="myNameD">我</span>
+      </div>
+      <div class="pc-score" style="color:var(--gold);" id="myScoreD">0</div>
+      <div class="pc-lives" id="myLivesD">❤️❤️❤️</div>
+      <div class="pc-status" id="myStatusD">第 1 關</div>
     </div>
-    <div class="vs-center">
+    <div class="vs-mid">
       <div class="vs-txt">VS</div>
-      <div class="cur-round-txt" id="curRoundTxt">第 1 輪</div>
-      <div style="font-size:9px;color:#1e1e48;" id="curLvlTxt">第 1 關</div>
+      <div style="font-size:9px;color:#1e1e48;" id="roomCodeSmall"></div>
     </div>
-    <div class="player-card pc-p2" id="p2Card">
-      <div class="pc-active off" id="p2Dot"></div>
-      <div class="pc-name" style="color:var(--teal);text-align:right;">🎮 <span id="p2NameDisp">P2</span></div>
-      <div class="pc-score" style="color:var(--teal);text-align:right;" id="p2ScoreDisp">0</div>
-      <div class="pc-rounds" style="justify-content:flex-end;" id="p2Pips"></div>
+    <div class="pc pc-opp">
+      <div class="pc-name" style="color:var(--teal);justify-content:flex-end;">
+        🎮 <span id="oppNameD">等待中…</span>
+        <span class="live-dot" id="oppOnlineDot" style="background:#3a3a68;"></span>
+      </div>
+      <div class="pc-score" style="color:var(--teal);text-align:right;" id="oppScoreD">0</div>
+      <div class="pc-lives" style="text-align:right;opacity:.4;" id="oppLivesD">❤️❤️❤️</div>
+      <div class="pc-status" style="text-align:right;" id="oppStatusD">尚未加入</div>
     </div>
   </div>
 
-  <!-- Turn banner -->
-  <div class="turn-banner tb-p1" id="turnBanner">👤 玩家一 的回合，開始！</div>
-
   <!-- Height bars -->
-  <div class="hbar-row">
-    <div class="hbar-label" style="color:#ff8090;font-size:9px;text-align:right;">高度</div>
-    <div class="hbar-wrap"><div class="hbar p1" id="hbarEl" style="width:0%"></div></div>
+  <div class="hbars">
+    <div class="hb-wrap">
+      <div class="hb-label" style="color:#ff8090;text-align:right;">高度</div>
+      <div class="hb-bg"><div class="hb hb-me" id="myHbar" style="width:0%"></div></div>
+    </div>
+    <div style="font-size:9px;color:#1e1e48;padding:0 4px;">↕</div>
+    <div class="hb-wrap" style="flex-direction:row-reverse;">
+      <div class="hb-label" style="color:var(--teal);">高度</div>
+      <div class="hb-bg"><div class="hb hb-opp" id="oppHbar" style="width:0%"></div></div>
+    </div>
   </div>
 
   <!-- Canvas -->
   <div class="canvas-wrap">
-    <canvas id="gameCanvas" class="p1-turn"></canvas>
-    <!-- Main overlay -->
-    <div class="overlay show" id="mainOverlay">
+    <canvas id="gc"></canvas>
+    <div class="ov show" id="mainOv">
       <div class="ov-em" id="ovEm">🦍</div>
-      <div class="ov-ttl gold" id="ovTtl">金剛爬塔</div>
-      <div class="ov-sub" id="ovSub">按開始進入遊戲</div>
+      <div class="ov-ttl gold" id="ovTtl">等待開始</div>
+      <div class="ov-sub" id="ovSub">等待朋友加入後一起開始！</div>
       <div class="ov-btns" id="ovBtns">
-        <button class="btn btn-red" onclick="beginTurn()">▶ 開始</button>
+        <button class="btn btn-red" onclick="beginGame()">▶ 開始我的回合</button>
       </div>
     </div>
   </div>
 
   <!-- Controls -->
-  <div class="ctrl-row">
-    <div class="dpad-wrap">
-      <div class="dpad">
-        <button class="dpad-btn up" id="dUp" onpointerdown="kd('up')" onpointerup="ku('up')" onpointercancel="ku('up')">▲</button>
-        <button class="dpad-btn left" id="dLeft" onpointerdown="kd('left')" onpointerup="ku('left')" onpointercancel="ku('left')">◀</button>
-        <button class="dpad-btn right" id="dRight" onpointerdown="kd('right')" onpointerup="ku('right')" onpointercancel="ku('right')">▶</button>
+  <div class="ctrl">
+    <div class="dpw">
+      <div class="dp">
+        <button class="db up" id="dUp" onpointerdown="kd('up')" onpointerup="ku('up')" onpointercancel="ku('up')">▲</button>
+        <button class="db left" id="dLeft" onpointerdown="kd('left')" onpointerup="ku('left')" onpointercancel="ku('left')">◀</button>
+        <button class="db right" id="dRight" onpointerdown="kd('right')" onpointerup="ku('right')" onpointercancel="ku('right')">▶</button>
       </div>
     </div>
-    <button class="jump-btn" onpointerdown="kd('jump')" onpointerup="ku('jump')" onpointercancel="ku('jump')">🦘<br><span style="font-size:9px;">跳</span></button>
+    <button class="jb" onpointerdown="kd('jump')" onpointerup="ku('jump')" onpointercancel="ku('jump')">🦘<br><span style="font-size:9px;">跳</span></button>
   </div>
-  <div class="ctrl-hint">← → 移動 · ↑ / 空白 跳躍 · 按鈕隨回合切換</div>
+  <div class="hint">← → 移動 · ↑ / 空白 跳躍</div>
 
   <!-- Chat -->
-  <div class="chat-wrap">
+  <div class="chat">
     <div class="chat-hdr">
-      <div class="chat-hdr-l">
-        <div class="c-dot" id="cDot"></div>
+      <div style="display:flex;align-items:center;gap:7px;">
+        <div class="cdot" id="cDot"></div>
         <div>
-          <div class="chat-title">💬 聊天室</div>
-          <div class="chat-ontxt" id="cOnTxt">連線中…</div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);">💬 即時聊天</div>
+          <div style="font-size:9.5px;color:#2a2a68;" id="cOnTxt">連線中…</div>
         </div>
       </div>
     </div>
     <div class="chat-msgs" id="chatMsgs">
-      <div class="cm sys"><div class="cm-bubble">🎮 歡迎！遊戲開始，互相加油吧！</div></div>
-    </div>
-    <div class="typing-row" id="typingRow">
-      <div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+      <div class="cm sy"><div class="cm-b">🎮 歡迎！邀請朋友一起玩！</div></div>
     </div>
     <div class="qr-row">
       <button class="qr" onclick="qr('🔥 超猛！')">🔥猛</button>
       <button class="qr" onclick="qr('😅 好難…')">😅難</button>
-      <button class="qr" onclick="qr('🏆 我贏了！換你！')">🏆贏了換你</button>
+      <button class="qr" onclick="qr('🏆 我贏了！換你！')">🏆我贏換你</button>
       <button class="qr" onclick="qr('💀 被打中了！')">💀死了</button>
       <button class="qr" onclick="qr('👏 加油！')">👏加油</button>
       <button class="qr" onclick="qr('🎯 再來一局！')">🎯再來</button>
-      <button class="qr" onclick="qr('😂 哈哈哈！')">😂哈哈</button>
     </div>
     <div class="chat-inp-row">
-      <input class="chat-inp" id="chatInp" placeholder="說點什麼…" maxlength="80">
-      <button class="chat-send" onclick="sendChat()">➤</button>
+      <input class="cinp" id="chatInp" placeholder="說點什麼…" maxlength="80">
+      <button class="csend" onclick="sendChat()">➤</button>
     </div>
   </div>
 </div>
@@ -347,160 +293,246 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  SETTINGS
-// ══════════════════════════════════════════════════════
-let ruleMode='A'; // A=交替 B=連打多局
-let roundsPerPlayer=3; // mode B: each player plays this many games per turn
-let totalRounds=3;     // how many times each player gets a "turn" (or batch)
-let roundNum=0;        // how many rounds each player has played
+// ══════════════════════════════════════════════════
+//  ⚠️ 請把下面這行改成你的 Render 伺服器網址！
+//  部署後長這樣：https://你的名字-kong.onrender.com
+// ══════════════════════════════════════════════════
+const SERVER_URL = 'https://kong-server-q68o.onrender.com';
 
-function pickRule(r){
-  ruleMode=r;
-  document.getElementById('ruleA').classList.toggle('sel',r==='A');
-  document.getElementById('ruleB').classList.toggle('sel',r==='B');
-  document.getElementById('roundSelRow').style.display=r==='B'?'block':'none';
-  updateTotalDisp();
+let socket = null;
+let myNick = '玩家';
+let myRoom = '';
+let oppData = { score:0, lives:3, level:1, x:0, y:0, h:0, state:'waiting', nick:'對手' };
+let oppConnected = false;
+let inviteLink = '';
+
+// ══ SOCKET CONNECT ══
+function connectSocket() {
+  socket = io(SERVER_URL, { transports: ['websocket','polling'] });
+  socket.on('connect', () => {
+    document.getElementById('cDot').classList.add('on');
+    document.getElementById('cOnTxt').textContent = '伺服器已連線';
+  });
+  socket.on('disconnect', () => {
+    document.getElementById('cDot').classList.remove('on');
+    document.getElementById('cOnTxt').textContent = '連線中斷…';
+  });
+  socket.on('room_update', (data) => {
+    const others = data.players.filter(p => p.id !== socket.id);
+    if (others.length > 0 && !oppConnected) {
+      oppConnected = true;
+      oppData.nick = others[0].nick;
+      document.getElementById('oppNameD').textContent = others[0].nick;
+      document.getElementById('oppOnlineDot').style.background = 'var(--green)';
+      document.getElementById('oppOnlineDot').style.boxShadow = '0 0 5px rgba(6,214,160,.5)';
+      document.getElementById('oppStatusD').textContent = '已加入！';
+      document.getElementById('oppLivesD').style.opacity = '1';
+      document.getElementById('waitTxt').textContent = '朋友已加入！';
+      document.getElementById('waitRow').style.background = 'rgba(6,214,160,.1)';
+      toast(`👥 ${others[0].nick} 加入了！`);
+      // hide waiting overlay if showing
+      if (document.getElementById('ovTtl').textContent === '等待開始') {
+        setOv('🦍','準備好了！',`${others[0].nick} 已加入，開始吧！`,
+          `<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
+      }
+    }
+  });
+  socket.on('opp_pos', (data) => {
+    oppData = { ...oppData, ...data };
+    updateOppHUD();
+  });
+  socket.on('opp_score', (data) => {
+    oppData = { ...oppData, ...data };
+    updateOppHUD();
+  });
+  socket.on('chat_msg', (data) => renderMsg(data));
+  socket.on('chat_history', (msgs) => msgs.forEach(m => renderMsg(m)));
+  socket.on('game_event', (data) => {
+    if (data.type === 'win') {
+      sysMsg(`🏆 ${data.nick} 以 ${data.score} 分完成第 ${data.level} 關！`);
+      toast(`🏆 ${data.nick} 過關了！`);
+    } else if (data.type === 'dead') {
+      sysMsg(`💥 ${data.nick} 被擊中了！剩 ${data.lives} 命`);
+    } else if (data.type === 'gameover') {
+      sysMsg(`💀 ${data.nick} 遊戲結束，最終分數 ${data.score}`);
+    }
+  });
 }
-let rpp=3,tot=3;
-function adj(d){rpp=Math.max(1,Math.min(9,rpp+d));document.getElementById('roundNumDisp').textContent=rpp;updateTotalDisp();}
-function adjTotal(d){tot=Math.max(1,Math.min(9,tot+d));document.getElementById('totalRoundDisp').textContent=tot;updateTotalDisp();}
-function updateTotalDisp(){
-  const perBatch=ruleMode==='A'?1:rpp;
-  document.getElementById('totalGamesDisp').textContent=tot*2*perBatch;
+
+// ══ LOBBY ══
+function createRoom() {
+  myNick = document.getElementById('nickInp').value.trim() || '玩家';
+  localStorage.setItem('kongNick', myNick);
+  myRoom = Math.random().toString(36).slice(2,8).toUpperCase();
+  const base = location.href.split('?')[0];
+  inviteLink = `${base}?room=${myRoom}`;
+  document.getElementById('inviteBox').style.display = 'block';
+  document.getElementById('roomCodeDisp').textContent = myRoom;
+  document.getElementById('inviteLinkDisp').textContent = inviteLink;
+  connectAndJoin();
 }
-updateTotalDisp();
 
-// ══════════════════════════════════════════════════════
-//  GAME ENGINE
-// ══════════════════════════════════════════════════════
-const GRAVITY=0.48, BARREL_SPD=2.4;
-const canvas=document.getElementById('gameCanvas');
-const ctx=canvas.getContext('2d');
+function joinRoom() {
+  myNick = document.getElementById('nickInp').value.trim() || '玩家';
+  localStorage.setItem('kongNick', myNick);
+  const code = document.getElementById('codeInp').value.trim().toUpperCase();
+  if (!code) { toast('請輸入邀請碼！'); return; }
+  myRoom = code;
+  connectAndJoin();
+}
 
-let platforms=[],ladders=[],barrels=[],flames=[];
-let player={x:0,y:0,vx:0,vy:0,w:28,h:34,onGround:false,dir:1,animFrame:0};
+function connectAndJoin() {
+  if (!socket || !socket.connected) connectSocket();
+  setTimeout(() => {
+    socket.emit('join_room', { roomCode: myRoom, nick: myNick });
+    enterGame();
+  }, 800);
+}
+
+function enterGame() {
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('game').style.display = 'block';
+  document.getElementById('myNameD').textContent = myNick;
+  document.getElementById('roomCodeSmall').textContent = '房間：' + myRoom;
+  setupCanvas(); buildLevel(1);
+  if (!frameId) loop();
+}
+
+function copyLink() {
+  navigator.clipboard?.writeText(inviteLink)
+    .then(() => toast('📋 連結已複製！'))
+    .catch(() => { prompt('複製這個連結：', inviteLink); });
+}
+function shareLink() {
+  if (navigator.share) navigator.share({ title: '金剛爬塔邀請', text: '來和我玩！邀請碼：' + myRoom, url: inviteLink }).catch(() => copyLink());
+  else copyLink();
+}
+function backLobby() {
+  if (frameId) { cancelAnimationFrame(frameId); frameId = null; }
+  document.getElementById('lobby').style.display = 'block';
+  document.getElementById('game').style.display = 'none';
+}
+
+// ══ GAME ENGINE ══
+const cv = document.getElementById('gc');
+const ctx = cv.getContext('2d');
+const GRAVITY = 0.48, BSPD = 2.4;
+let platforms=[], ladders=[], barrels=[], flames=[];
+let pl={x:0,y:0,vx:0,vy:0,w:28,h:34,onGround:false,dir:1,animFrame:0};
 let kong={x:0,y:0,w:46,h:46,throwTimer:0};
 let princess={x:0,y:0};
-let level=1,score=0,lives=3;
-let gameState='idle'; // idle|playing|dead|win|gameover
-let frames=0,scoreTimer=0;
+let level=1, score=0, lives=3, gState='idle', frames=0, scoreTimer=0;
 const keys={left:false,right:false,jump:false,up:false};
 const jp={v:false};
 
-// Players
-const P=[
-  {name:'玩家一',totalScore:0,rounds:[],gamesThisTurn:0,color:'#ff8090',emoji:'👤'},
-  {name:'玩家二',totalScore:0,rounds:[],gamesThisTurn:0,color:'#60d0f0',emoji:'🎮'},
-];
-let curP=0; // 0 or 1
-let matchRound=1; // current "round" (each player gets a turn = 1 round)
-let totalMatchRounds=tot*2; // total game-slots
-
-function cellW(){return Math.floor(canvas.width/12);}
+function cellW(){return Math.floor(cv.width/12);}
 function cellH(){return Math.round(cellW()*1.1);}
 
 function setupCanvas(){
-  const maxW=Math.min(window.innerWidth-18,540);
-  canvas.width=maxW; canvas.height=Math.round(maxW*1.28);
+  cv.width=Math.min(window.innerWidth-18,540);
+  cv.height=Math.round(cv.width*1.28);
 }
 
 function buildLevel(lvl){
-  const W=canvas.width,H=canvas.height,CW=cellW(),CH=cellH();
+  const W=cv.width,H=cv.height,CW=cellW(),CH=cellH();
   platforms=[];ladders=[];barrels=[];flames=[];
-  player.vx=0;player.vy=0;player.onGround=false;
-  const pd=[
-    {y:H-CH,   x:0,     w:W},
-    {y:H-CH*4, x:0,     w:W*.85},
-    {y:H-CH*7, x:W*.15, w:W*.85},
-    {y:H-CH*10,x:0,     w:W*.85},
-    {y:H-CH*13,x:W*.1,  w:W*.9},
-  ];
-  pd.forEach((p,i)=>platforms.push({x:p.x,y:p.y,w:p.w,h:7,dark:i%2===0}));
-  ladders.push(
-    {x:W*.12,y:H-CH*4, h:CH*3},
-    {x:W*.78,y:H-CH*7, h:CH*3},
-    {x:W*.22,y:H-CH*10,h:CH*3},
-    {x:W*.72,y:H-CH*13,h:CH*3}
-  );
-  kong.x=W*.1+6; kong.y=H-CH*13-kong.h+2;
-  princess.x=W*.78; princess.y=H-CH*13-30;
-  player.x=14; player.y=H-CH-player.h;
-  if(lvl>=2){
-    flames.push({x:W*.35,y:H-CH-18,vx:1.5+lvl*.25,f:0});
-    flames.push({x:W*.65,y:H-CH-18,vx:-(1.7+lvl*.25),f:0});
-  }
+  pl.vx=0;pl.vy=0;pl.onGround=false;
+  [{y:H-CH,x:0,w:W},{y:H-CH*4,x:0,w:W*.85},{y:H-CH*7,x:W*.15,w:W*.85},{y:H-CH*10,x:0,w:W*.85},{y:H-CH*13,x:W*.1,w:W*.9}]
+    .forEach((p,i)=>platforms.push({...p,h:7,dark:i%2===0}));
+  ladders.push({x:W*.12,y:H-CH*4,h:CH*3},{x:W*.78,y:H-CH*7,h:CH*3},{x:W*.22,y:H-CH*10,h:CH*3},{x:W*.72,y:H-CH*13,h:CH*3});
+  kong.x=W*.1+6;kong.y=H-CH*13-kong.h+2;
+  princess.x=W*.78;princess.y=H-CH*13-30;
+  pl.x=14;pl.y=H-CH-pl.h;
+  if(lvl>=2){flames.push({x:W*.35,y:H-CH-18,vx:1.5+lvl*.25,f:0},{x:W*.65,y:H-CH-18,vx:-(1.7+lvl*.25),f:0});}
   kong.throwTimer=0;
-}
-
-function onPlat(px,py,pw,ph,vy){
-  for(const p of platforms) if(px+pw>p.x&&px<p.x+p.w&&py+ph>=p.y&&py+ph<=p.y+vy+10&&vy>=0) return p;
-  return null;
-}
-function onLad(px,py,pw,ph){
-  for(const l of ladders) if(px+pw*.5>l.x-9&&px+pw*.5<l.x+20&&py+ph>l.y&&py<l.y+l.h) return l;
-  return null;
 }
 
 let frameId=null;
 function loop(){
   frameId=requestAnimationFrame(loop);
   frames++;
-  if(gameState==='playing') tick();
+  if(gState==='playing') tick();
   draw();
+  // broadcast position every 3 frames
+  if(frames%3===0 && socket && gState==='playing'){
+    const topY=platforms[platforms.length-1]?.y||0;
+    const ht=Math.max(0,Math.min(100,Math.round(100*(1-(pl.y-topY)/(cv.height-topY)))));
+    socket.emit('pos',{x:Math.round(pl.x),y:Math.round(pl.y),dir:pl.dir,score,lives,level,h:ht,state:gState,nick:myNick,cw:cv.width,ch:cv.height});
+  }
+  if(frames%60===0) updateMyHUD();
 }
 
 function tick(){
-  // move player
-  player.vx=0;
-  if(keys.left){player.vx=-3.5;player.dir=-1;}
-  if(keys.right){player.vx=3.5;player.dir=1;}
-  player.vy+=GRAVITY;
-  if(onLad(player.x,player.y,player.w,player.h)&&keys.up) player.vy=-2.8;
-  if((keys.jump||keys.up)&&player.onGround&&!jp.v){player.vy=-11;player.onGround=false;jp.v=true;}
+  pl.vx=0;
+  if(keys.left){pl.vx=-3.5;pl.dir=-1;}
+  if(keys.right){pl.vx=3.5;pl.dir=1;}
+  pl.vy+=GRAVITY;
+  for(const l of ladders) if(pl.x+pl.w*.5>l.x-9&&pl.x+pl.w*.5<l.x+20&&pl.y+pl.h>l.y&&pl.y<l.y+l.h&&keys.up) pl.vy=-2.8;
+  if((keys.jump||keys.up)&&pl.onGround&&!jp.v){pl.vy=-11;pl.onGround=false;jp.v=true;}
   if(!keys.jump&&!keys.up) jp.v=false;
-  player.x+=player.vx; player.y+=player.vy;
-  player.x=Math.max(0,Math.min(canvas.width-player.w,player.x));
-  player.onGround=false;
-  for(const p of platforms){
-    if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+player.vy+10&&player.vy>=0){
-      player.y=p.y-player.h;player.vy=0;player.onGround=true;
-    }
-  }
-  if(frames%8===0) player.animFrame=(player.animFrame+1)%4;
-  // barrels
+  pl.x+=pl.vx;pl.y+=pl.vy;
+  pl.x=Math.max(0,Math.min(cv.width-pl.w,pl.x));
+  pl.onGround=false;
+  for(const p of platforms) if(pl.x+pl.w>p.x&&pl.x<p.x+p.w&&pl.y+pl.h>=p.y&&pl.y+pl.h<=p.y+pl.vy+10&&pl.vy>=0){pl.y=p.y-pl.h;pl.vy=0;pl.onGround=true;}
+  if(frames%8===0) pl.animFrame=(pl.animFrame+1)%4;
   kong.throwTimer++;
-  const intv=Math.max(55,110-level*18);
-  if(kong.throwTimer>=intv){kong.throwTimer=0;barrels.push({x:kong.x+kong.w,y:kong.y+kong.h*.6,w:19,h:19,vx:BARREL_SPD+level*.35,vy:0,f:0});}
-  for(let i=barrels.length-1;i>=0;i--){
-    const b=barrels[i];
-    b.vy+=GRAVITY*.7;b.x+=b.vx;b.y+=b.vy;
-    for(const p of platforms) if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}
-    if(b.x<-30||b.x>canvas.width+50||b.y>canvas.height+80) barrels.splice(i,1);
-    if(frames%4===0) b.f=(b.f+1)%4;
-  }
-  // flames
-  for(const f of flames){f.x+=f.vx;if(f.x<0||f.x>canvas.width-18)f.vx*=-1;if(frames%6===0)f.f=(f.f+1)%4;}
-  // collisions
-  for(const b of barrels) if(Math.abs(player.x+14-(b.x+9))<19&&Math.abs(player.y+17-(b.y+9))<19){onHit();return;}
-  for(const f of flames) if(Math.abs(player.x+14-f.x)<20&&Math.abs(player.y+17-f.y)<20){onHit();return;}
-  if(player.y>canvas.height+40){onHit();return;}
-  // win
-  if(Math.abs(player.x-princess.x)<38&&Math.abs(player.y-princess.y)<46){onWin();return;}
-  // score
+  if(kong.throwTimer>=Math.max(55,110-level*18)){kong.throwTimer=0;barrels.push({x:kong.x+kong.w,y:kong.y+kong.h*.6,w:19,h:19,vx:BSPD+level*.35,vy:0,f:0});}
+  for(let i=barrels.length-1;i>=0;i--){const b=barrels[i];b.vy+=GRAVITY*.7;b.x+=b.vx;b.y+=b.vy;for(const p of platforms)if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}if(b.x<-30||b.x>cv.width+50||b.y>cv.height+80)barrels.splice(i,1);if(frames%4===0)b.f=(b.f+1)%4;}
+  for(const f of flames){f.x+=f.vx;if(f.x<0||f.x>cv.width-18)f.vx*=-1;if(frames%6===0)f.f=(f.f+1)%4;}
+  for(const b of barrels) if(Math.abs(pl.x+14-(b.x+9))<19&&Math.abs(pl.y+17-(b.y+9))<19){onHit();return;}
+  for(const f of flames) if(Math.abs(pl.x+14-f.x)<20&&Math.abs(pl.y+17-f.y)<20){onHit();return;}
+  if(pl.y>cv.height+40){onHit();return;}
+  if(Math.abs(pl.x-princess.x)<38&&Math.abs(pl.y-princess.y)<46){onWin();return;}
   scoreTimer++;
-  if(scoreTimer%60===0){score+=10*level;updateHUD();}
+  if(scoreTimer%60===0){score+=10*level;updateMyHUD();}
   const topY=platforms[platforms.length-1]?.y||0;
-  const ht=Math.max(0,Math.min(1,1-(player.y-topY)/(canvas.height-topY)));
+  const ht=Math.max(0,Math.min(1,1-(pl.y-topY)/(cv.height-topY)));
   if(scoreTimer%12===0&&ht>.08) score+=Math.floor(ht*4);
-  // height bar
-  document.getElementById('hbarEl').style.width=Math.round(ht*100)+'%';
+  document.getElementById('myHbar').style.width=Math.round(ht*100)+'%';
 }
 
-// ══ DRAW ══
-function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);ctx.arcTo(x,y,x+r,y,r);ctx.closePath();ctx.fill();}
+function beginGame(){
+  score=0;lives=3;level=1;gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
+  buildLevel(1);updateMyHUD();hideOv();
+  sysMsg(`🎮 ${myNick} 開始遊戲！`);
+}
+function restartMe(){
+  score=0;lives=3;level=1;gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
+  buildLevel(1);updateMyHUD();hideOv();
+  sysMsg(`🔄 ${myNick} 重新開始`);
+}
+
+function onHit(){
+  lives--;
+  socket?.emit('game_event',{type:'dead',score,lives,level,nick:myNick});
+  if(lives<=0){
+    gState='gameover';
+    socket?.emit('game_event',{type:'gameover',score,lives:0,level,nick:myNick});
+    setOv('💀','遊戲結束',`最終分數 ${score}`,`<button class="btn btn-red" onclick="restartMe()">再來一局</button>`);
+  } else {
+    setOv('💥','被擊中了！',`剩 ${lives} 命`,
+      `<button class="btn btn-red" onclick="respawn()">❤️ 繼續（剩${lives}命）</button>`+
+      `<button class="btn" onclick="restartMe()">重新開始</button>`);
+  }
+  updateMyHUD();
+}
+function respawn(){
+  pl.x=14;pl.y=cv.height-cellH()-pl.h;pl.vx=0;pl.vy=0;pl.onGround=false;
+  barrels=[];gState='playing';hideOv();
+}
+function onWin(){
+  score+=1000;gState='win';
+  socket?.emit('game_event',{type:'win',score,lives,level,nick:myNick});
+  socket?.emit('score_update',{score,lives,level,nick:myNick});
+  updateMyHUD();
+  setOv('🏆','過關！',`分數 ${score}　第 ${level} 關`,
+    `<button class="btn btn-green" onclick="nextLevel()">下一關 →</button><button class="btn" onclick="restartMe()">重新開始</button>`);
+  sysMsg(`🏆 ${myNick} 以 ${score} 分完成第 ${level} 關！`);
+}
+function nextLevel(){level=Math.min(level+1,3);score+=0;gState='playing';barrels=[];buildLevel(level);hideOv();updateMyHUD();sysMsg(`📦 第 ${level} 關開始！`);}
+
 function draw(){
-  const W=canvas.width,H=canvas.height,CW=cellW(),CH=cellH();
+  const W=cv.width,H=cv.height,CW=cellW(),CH=cellH();
   ctx.clearRect(0,0,W,H);
   const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07071a');bg.addColorStop(1,'#101028');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   ctx.fillStyle='rgba(255,255,255,.3)';for(let i=0;i<22;i++)ctx.fillRect((i*83+11)%W,(i*57+7)%H,1,1);
@@ -510,420 +542,93 @@ function draw(){
   for(const f of flames){['#ff3010','#ff7000','#ffcc00'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();const s=(14-i*3)*(1+Math.sin(frames*.2+f.x)*.08);ctx.ellipse(f.x,f.y-i*4,s*.5,s*.9,0,0,Math.PI*2);ctx.fill();});}
   ctx.font=`${Math.round(CW*1.1)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('👸',princess.x+14,princess.y+6);
   ctx.font=`${Math.round(CW*1.5)}px sans-serif`;ctx.fillText('🦍',kong.x+kong.w/2,kong.y+kong.h);
-  const em=player.onGround?(player.vx!==0?'🏃':'🧍'):'🤸';
+  // my player
+  const em=pl.onGround?(pl.vx!==0?'🏃':'🧍'):'🤸';
   ctx.font=`${Math.round(CW*.95)}px sans-serif`;
-  ctx.save();if(player.dir===-1){ctx.scale(-1,1);ctx.fillText(em,-(player.x+player.w/2),player.y+player.h);}else ctx.fillText(em,player.x+player.w/2,player.y+player.h);ctx.restore();
-  // current player label
-  const cp=P[curP];ctx.fillStyle='rgba(255,255,255,.18)';ctx.font='bold 10px monospace';ctx.textAlign='left';ctx.fillText(`${cp.emoji} ${cp.name}  ${score}分`,6,15);
-}
-
-// ══════════════════════════════════════════════════════
-//  TURN MANAGEMENT
-// ══════════════════════════════════════════════════════
-let gameSlot=0; // which game slot we are on (0-indexed)
-let totalSlots=0;
-let gamesInCurrentBatch=0;
-let batchLimit=1;
-
-function calcSlots(){
-  batchLimit=ruleMode==='A'?1:rpp;
-  totalSlots=tot*2*batchLimit; // each "round" has 2 players, each plays batchLimit games
-  totalMatchRounds=tot;
-}
-
-function startMatch(){
-  calcSlots();
-  gameSlot=0; gamesInCurrentBatch=0;
-  P[0].totalScore=0;P[0].rounds=[];P[0].gamesThisTurn=0;
-  P[1].totalScore=0;P[1].rounds=[];P[1].gamesThisTurn=0;
-  curP=0;
-  updateHUD();
-  showTurnStart();
-}
-
-function currentBatchPlayer(){
-  // determine who plays based on gameSlot
-  const batchIdx=Math.floor(gameSlot/batchLimit);
-  return batchIdx%2; // 0 or 1
-}
-
-function beginTurn(){
-  curP=currentBatchPlayer();
-  level=1; score=0; lives=3; gameState='playing';
-  scoreTimer=0; frames=0; barrels=[]; flames=[];
-  buildLevel(1);
-  updateHUD();
-  updateTurnBanner();
-  hideOverlay();
-  updateCanvasBorder();
-}
-
-function onHit(){
-  lives--;
-  updateHUD();
-  gameState='dead';
-  P[curP].rounds.push({score,win:false,lives:0});
-  if(lives>0){
-    // Can continue OR switch — show choice
-    showDeathChoice();
-  } else {
-    endCurrentGame('dead');
+  ctx.save();if(pl.dir===-1){ctx.scale(-1,1);ctx.fillText(em,-(pl.x+pl.w/2),pl.y+pl.h);}else ctx.fillText(em,pl.x+pl.w/2,pl.y+pl.h);ctx.restore();
+  // opp ghost
+  if(oppConnected&&oppData.x){
+    const sx=cv.width/(oppData.cw||cv.width),sy=cv.height/(oppData.ch||cv.height);
+    const ox=oppData.x*sx,oy=oppData.y*sy;
+    ctx.globalAlpha=.5;ctx.font=`${Math.round(CW*.9)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.save();if(oppData.dir===-1){ctx.scale(-1,1);ctx.fillText('🎮',-ox-(28*sx/2),oy+(34*sy));}else ctx.fillText('🎮',ox+28*sx/2,oy+34*sy);ctx.restore();
+    ctx.globalAlpha=1;
+    // opp name tag
+    ctx.fillStyle='rgba(0,200,240,.7)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';
+    ctx.fillText(oppData.nick||'對手',ox+28*sx/2,oy-2);
   }
+  ctx.fillStyle='rgba(255,255,255,.18)';ctx.font='bold 10px monospace';ctx.textAlign='left';ctx.fillText(`${myNick} ${score}`,5,14);
 }
 
-function onWin(){
-  score+=1000; updateHUD();
-  gameState='win';
-  P[curP].rounds.push({score,win:true});
-  P[curP].totalScore+=score;
-  endCurrentGame('win');
+// ══ HUD ══
+function updateMyHUD(){
+  document.getElementById('myScoreD').textContent=score;
+  const lh=lives>0?'❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(Math.max(0,3-lives)):'💀';
+  document.getElementById('myLivesD').textContent=lh;
+  document.getElementById('myStatusD').textContent=`第 ${level} 關`;
+  socket?.emit('score_update',{score,lives,level,nick:myNick});
 }
-
-function continueAfterDeath(){
-  // Reset player position, keep score
-  player.x=14; player.y=canvas.height-cellH()-player.h;
-  player.vx=0; player.vy=0; player.onGround=false;
-  barrels=[]; gameState='playing';
-  hideOverlay();
-  postSys(`${P[curP].emoji} ${P[curP].name} 繼續挑戰！剩 ${lives} 命`);
+function updateOppHUD(){
+  document.getElementById('oppScoreD').textContent=oppData.score||0;
+  document.getElementById('oppStatusD').textContent=`第 ${oppData.level||1} 關`;
+  document.getElementById('oppHbar').style.width=(oppData.h||0)+'%';
+  const lh=(oppData.lives||0)>0?'❤️'.repeat(Math.max(0,oppData.lives||0)):'💀';
+  document.getElementById('oppLivesD').textContent=lh;
 }
-
-function switchAfterDeath(){
-  P[curP].totalScore+=score;
-  endCurrentGame('switched');
-}
-
-function endCurrentGame(reason){
-  gameSlot++;
-  gamesInCurrentBatch++;
-  updatePips();
-  const nextP=currentBatchPlayer();
-  const batchDone=gamesInCurrentBatch>=batchLimit||reason==='win';
-  if(gameSlot>=totalSlots){
-    showFinalResult(); return;
-  }
-  if(batchDone||(ruleMode==='A')){
-    gamesInCurrentBatch=0;
-    // switch player
-    showTurnEnd(reason,nextP);
-  } else {
-    // same player continues batch
-    showNextGameInBatch(reason);
-  }
-}
-
-function showDeathChoice(){
-  const p=P[curP];
-  const remaining=batchLimit-gamesInCurrentBatch-1;
-  setOverlay(
-    '💥','被擊中了！',
-    `分數 ${score}　剩 ${lives} 命`,
-    `<button class="btn btn-red" onclick="continueAfterDeath()">❤️ 繼續（剩${lives}命）</button>`+
-    `<button class="btn btn-gold" onclick="switchAfterDeath()">🔄 換 ${P[1-curP].name} 上場</button>`,
-    true
-  );
-  postSys(`💥 ${p.emoji} ${p.name} 被擊中！可以繼續或換人`);
-}
-
-function showNextGameInBatch(reason){
-  const p=P[curP];
-  const rem=batchLimit-gamesInCurrentBatch;
-  setOverlay(
-    reason==='win'?'🏆':'💀',
-    reason==='win'?`${p.emoji} 過關！`:`${p.emoji} 本局結束`,
-    `分數 ${score}　還有 ${rem} 局`,
-    `<button class="btn btn-red" onclick="beginTurn()">▶ 繼續下一局</button>`,
-    true
-  );
-  postSys(`${p.emoji} ${p.name} ${reason==='win'?'過關':'本局結束'}，本局分數 ${score}，還有 ${rem} 局`);
-  reqAIComment(`${p.name}${reason==='win'?'過關了':'本局結束'}，分數${score}`);
-}
-
-function showTurnEnd(reason,nextP){
-  const p=P[curP];
-  setOverlay(
-    reason==='win'?'🏆':'🏁',
-    `${p.emoji} ${p.name} 結束！`,
-    `本輪總分 ${score}　換 ${P[nextP].emoji} ${P[nextP].name} 上場了！`,
-    `<button class="btn btn-green" style="font-size:13px;padding:9px 20px;" onclick="beginTurn()">▶ ${P[nextP].name}，開始！</button>`,
-    true
-  );
-  postSys(`🔄 換 ${P[nextP].emoji} ${P[nextP].name} 上場了！`);
-  reqAIComment(`${p.name}本輪得${score}分，換${P[nextP].name}上場`);
-}
-
-function showTurnStart(){
-  const p=P[curP];
-  const rnd=Math.floor(gameSlot/(batchLimit*2))+1;
-  setOverlay(
-    p.emoji==='👤'?'🦍':'🎮',
-    `第 ${rnd} 輪`,
-    `${p.emoji} ${p.name} 先上！\n模式：${ruleMode==='A'?'交替輪流':`每人 ${rpp} 局`}　共 ${tot} 輪`,
-    `<button class="btn btn-red" onclick="beginTurn()">▶ 開始！</button>`,
-    true
-  );
-  updateTurnBanner();
-}
-
-function showFinalResult(){
-  gameState='idle';
-  const w=P[0].totalScore>P[1].totalScore?0:P[0].totalScore<P[1].totalScore?1:-1;
-  const html=`
-    <div class="final-board" style="width:100%;max-width:300px;">
-      <div class="final-row ${w===0||w===-1?'winner':'loser'}">
-        <div class="final-rank">${w===0?'🥇':w===-1?'🤝':'🥈'}</div>
-        <div class="final-info">
-          <div class="final-name" style="color:#ff8090;">👤 ${P[0].name}</div>
-          <div class="final-detail">${P[0].rounds.filter(r=>r.win).length} 局過關</div>
-        </div>
-        <div class="final-score">${P[0].totalScore}</div>
-      </div>
-      <div class="final-row ${w===1||w===-1?'winner':'loser'}">
-        <div class="final-rank">${w===1?'🥇':w===-1?'🤝':'🥈'}</div>
-        <div class="final-info">
-          <div class="final-name" style="color:#60d0f0;">🎮 ${P[1].name}</div>
-          <div class="final-detail">${P[1].rounds.filter(r=>r.win).length} 局過關</div>
-        </div>
-        <div class="final-score">${P[1].totalScore}</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px;">
-      <button class="btn btn-red" onclick="startMatch()">再來一場</button>
-      <button class="btn" onclick="backLobby()">換設定</button>
-    </div>`;
-  const title=w===-1?'平手！':w===0?`🏆 ${P[0].name} 獲勝！`:`🏆 ${P[1].name} 獲勝！`;
-  setOverlay('🎊',title,'',html,false);
-  postSys(`🎊 比賽結束！${w===-1?'平手':`${P[w].emoji} ${P[w].name} 獲勝`}！分數 ${P[0].totalScore} vs ${P[1].totalScore}`);
-  reqAIComment(`比賽結束，${P[0].name}${P[0].totalScore}分，${P[1].name}${P[1].totalScore}分`);
-}
-
-// ══ UI helpers ══
-function setOverlay(em,ttl,sub,btns,hasTitle){
-  document.getElementById('ovEm').textContent=em;
-  document.getElementById('ovTtl').textContent=ttl;
-  document.getElementById('ovTtl').className='ov-ttl '+(curP===0?'gold':'teal');
-  document.getElementById('ovSub').textContent=sub;
-  document.getElementById('ovBtns').innerHTML=btns||'';
-  document.getElementById('mainOverlay').classList.add('show');
-}
-function hideOverlay(){document.getElementById('mainOverlay').classList.remove('show');}
-
-function updateTurnBanner(){
-  const b=document.getElementById('turnBanner');
-  const p=P[curP];
-  const rnd=Math.floor(gameSlot/(batchLimit*2))+1;
-  b.textContent=`${p.emoji} ${p.name} 的回合　第 ${rnd} 輪 / 共 ${tot} 輪`;
-  b.className='turn-banner '+(curP===0?'tb-p1':'tb-p2');
-  document.getElementById('curRoundTxt').textContent=`第 ${rnd} 輪 / ${tot}`;
-  document.getElementById('curLvlTxt').textContent=`第 ${level} 關`;
-  document.getElementById('p1Dot').className='pc-active '+(curP===0?'on':'off');
-  document.getElementById('p2Dot').className='pc-active '+(curP===1?'on':'off');
-}
-
-function updateCanvasBorder(){
-  canvas.className=curP===0?'p1-turn':'p2-turn';
-}
-
-function updateHUD(){
-  document.getElementById('p1ScoreDisp').textContent=P[0].totalScore+(curP===0?'+'+score:'');
-  document.getElementById('p2ScoreDisp').textContent=P[1].totalScore+(curP===1?'+'+score:'');
-}
-
-function updatePips(){
-  [0,1].forEach(i=>{
-    const el=document.getElementById(`p${i+1}Pips`);
-    const slots=ruleMode==='A'?tot:tot*rpp;
-    el.innerHTML=P[i].rounds.slice(0,slots).map(r=>`<div class="round-pip ${r.win?'win':'loss'}"></div>`).join('');
-  });
-}
+function setOv(em,ttl,sub,btns){document.getElementById('ovEm').textContent=em;document.getElementById('ovTtl').textContent=ttl;document.getElementById('ovSub').textContent=sub;document.getElementById('ovBtns').innerHTML=btns||'';document.getElementById('mainOv').classList.add('show');}
+function hideOv(){document.getElementById('mainOv').classList.remove('show');}
 
 // ══ KEYBOARD ══
-function kd(k){
-  if(k==='left') keys.left=true;
-  if(k==='right') keys.right=true;
-  if(k==='up') keys.up=true;
-  if(k==='jump') keys.jump=true;
-  document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.add('pressed');
-}
-function ku(k){
-  if(k==='left') keys.left=false;
-  if(k==='right') keys.right=false;
-  if(k==='up') keys.up=false;
-  if(k==='jump') keys.jump=false;
-  document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.remove('pressed');
-}
-document.addEventListener('keydown',e=>{
-  if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-  if(e.key==='ArrowLeft'||e.key==='a') kd('left');
-  if(e.key==='ArrowRight'||e.key==='d') kd('right');
-  if(e.key==='ArrowUp'||e.key==='w') kd('up');
-  if(e.key===' '||e.key==='z'){e.preventDefault();kd('jump');}
-});
-document.addEventListener('keyup',e=>{
-  if(e.key==='ArrowLeft'||e.key==='a') ku('left');
-  if(e.key==='ArrowRight'||e.key==='d') ku('right');
-  if(e.key==='ArrowUp'||e.key==='w') ku('up');
-  if(e.key===' '||e.key==='z') ku('jump');
-});
-window.addEventListener('resize',()=>{if(document.getElementById('gameScreen').style.display!=='none'){setupCanvas();buildLevel(level);}});
-
-// ══════════════════════════════════════════════════════
-//  LOBBY ACTIONS
-// ══════════════════════════════════════════════════════
-function startLocal(){
-  P[0].name=document.getElementById('p1Nick').value.trim()||'玩家一';
-  P[1].name=document.getElementById('p2Nick').value.trim()||'玩家二';
-  rpp=parseInt(document.getElementById('roundNumDisp').textContent)||3;
-  tot=parseInt(document.getElementById('totalRoundDisp').textContent)||3;
-  document.getElementById('lobbyScreen').style.display='none';
-  document.getElementById('gameScreen').style.display='block';
-  document.getElementById('p1NameDisp').textContent=P[0].name;
-  document.getElementById('p2NameDisp').textContent=P[1].name;
-  setupCanvas(); buildLevel(1);
-  if(frameId) cancelAnimationFrame(frameId);
-  loop();
-  startMatch();
-  initCapabilities(false);
-  postSys(`🎮 ${P[0].name} vs ${P[1].name} 比賽開始！`);
-}
-
-let roomCode='',inviteLink='';
-function createOnline(){
-  P[0].name=document.getElementById('p1Nick').value.trim()||'玩家一';
-  P[1].name=document.getElementById('p2Nick').value.trim()||'玩家二';
-  rpp=parseInt(document.getElementById('roundNumDisp').textContent)||3;
-  tot=parseInt(document.getElementById('totalRoundDisp').textContent)||3;
-  roomCode='room_'+Math.random().toString(36).slice(2,9);
-  const base=location.href.split('?')[0];
-  inviteLink=`${base}?room=${roomCode}&p1=${encodeURIComponent(P[0].name)}&mode=${ruleMode}&rpp=${rpp}&tot=${tot}`;
-  document.getElementById('inviteBox').style.display='block';
-  document.getElementById('inviteLinkTxt').textContent=inviteLink;
-  startLocal();
-  initCapabilities(true);
-  postSys(`🔗 房間已建立，等待 ${P[1].name} 加入…`);
-}
-function copyLink(){navigator.clipboard?.writeText(inviteLink).then(()=>toast('📋 連結已複製！')).catch(()=>toast(inviteLink));}
-function shareLink(){if(navigator.share)navigator.share({title:'金剛爬塔邀請',text:'來和我一起玩！',url:inviteLink}).catch(()=>copyLink());else copyLink();}
-function backLobby(){
-  if(frameId){cancelAnimationFrame(frameId);frameId=null;}
-  document.getElementById('lobbyScreen').style.display='block';
-  document.getElementById('gameScreen').style.display='none';
-}
-
-// ══════════════════════════════════════════════════════
-//  REALTIME capabilities
-// ══════════════════════════════════════════════════════
-let dbRef=null,roomRef=null,sampleRef=null;
-let myUID='guest_'+Math.random().toString(36).slice(2,8);
-const seenMsgs=new Set();
-
-async function initCapabilities(withRoom){
-  try{
-    [dbRef,roomRef,sampleRef]=await Promise.all([
-      claude.use('db').catch(()=>null),
-      claude.use('room').catch(()=>null),
-      claude.use('sample').catch(()=>null),
-    ]);
-    if(dbRef) loadHistory();
-    if(withRoom&&roomRef){
-      try{if(roomCode) roomRef.join(roomCode);}catch(e){}
-      roomRef.on('chat',data=>{if(data.uid!==myUID) renderMsg('rm_'+Date.now()+'_'+Math.random().toString(36).slice(2,5),data);});
-      roomRef.onPeers(update=>{
-        const n=(update.peers||[]).filter(p=>p.state&&p.state.uid!==myUID).length;
-        if(n>0){
-          document.getElementById('cDot').classList.add('on');
-          document.getElementById('cOnTxt').textContent=`${n+1}人在線`;
-          document.getElementById('waitTxt').textContent=`好友已加入！`;
-          toast('👥 好友已連線！');
-        }
-      });
-    }
-    document.getElementById('cDot').classList.add('on');
-    document.getElementById('cOnTxt').textContent='聊天室已連線';
-    // Check URL for joining
-    const params=new URLSearchParams(location.search);
-    if(params.get('room')&&!withRoom){
-      roomCode=params.get('room');
-      P[0].name=decodeURIComponent(params.get('p1')||'玩家一');
-      P[1].name=localStorage.getItem('kongNick')||'玩家二';
-      ruleMode=params.get('mode')||'A';
-      rpp=parseInt(params.get('rpp'))||3;
-      tot=parseInt(params.get('tot'))||3;
-      document.getElementById('p1Nick').value=P[0].name;
-      document.getElementById('p2Nick').value=P[1].name;
-      pickRule(ruleMode);
-      document.getElementById('roundNumDisp').textContent=rpp;
-      document.getElementById('totalRoundDisp').textContent=tot;
-    }
-  }catch(e){}
-}
+function kd(k){if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='up')keys.up=true;if(k==='jump')keys.jump=true;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.add('pressed');}
+function ku(k){if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='up')keys.up=false;if(k==='jump')keys.jump=false;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.remove('pressed');}
+document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;if(e.key==='ArrowLeft'||e.key==='a')kd('left');if(e.key==='ArrowRight'||e.key==='d')kd('right');if(e.key==='ArrowUp'||e.key==='w')kd('up');if(e.key===' '||e.key==='z'){e.preventDefault();kd('jump');}});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key==='a')ku('left');if(e.key==='ArrowRight'||e.key==='d')ku('right');if(e.key==='ArrowUp'||e.key==='w')ku('up');if(e.key===' '||e.key==='z')ku('jump');});
+window.addEventListener('resize',()=>{if(document.getElementById('game').style.display!=='none'){setupCanvas();buildLevel(level);}});
 
 // ══ CHAT ══
+const seenMsgs=new Set();
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtT(ts){return new Date(ts).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});}
-function nickColor(n){const p=['#ff8090','#60d0f0','#80e0a0','#f0a060','#c0a0f8','#f0d060'];let h=0;for(const c of n)h=(h*31+c.charCodeAt(0))&0xffff;return p[h%p.length];}
-
-function renderMsg(id,data){
+function renderMsg(data){
+  const id=data.id||data.ts;
   if(seenMsgs.has(id))return;seenMsgs.add(id);
-  const isMe=data.uid===myUID,isSys=data.type==='system',isAI=data.uid==='ai_host';
+  const isMe=data.nick===myNick,isSys=data.type==='system';
   const el=document.getElementById('chatMsgs');
   const w=document.createElement('div');
-  if(isSys){w.className='cm sys';w.innerHTML=`<div class="cm-bubble">${esc(data.text||'')}</div>`;}
+  if(isSys){w.className='cm sy';w.innerHTML=`<div class="cm-b">${esc(data.text||'')}</div>`;}
   else{
-    w.className='cm '+(isMe?'me':isAI?'ai':'other');
-    const color=isAI?'var(--purple)':isMe?'var(--red)':nickColor(data.name||'');
-    const ava=isAI?'🤖':isMe?P[0].emoji:P[1].emoji;
-    w.innerHTML=`<div class="cm-meta"><div class="cm-ava" style="background:${color}22;">${ava}</div><span class="cm-name" style="color:${color}">${esc(data.name||'')}</span><span class="cm-time">${fmtT(data.ts)}</span></div><div class="cm-bubble">${esc(data.text||'')}</div>`;
+    w.className='cm '+(isMe?'me':'op');
+    const color=isMe?'var(--red)':'var(--teal)';
+    const ava=isMe?'😊':'🎮';
+    w.innerHTML=`<div class="cm-meta"><div class="cm-ava" style="background:${color}22;">${ava}</div><span class="cm-name" style="color:${color}">${esc(data.nick||'')}</span><span class="cm-time">${fmtT(data.ts)}</span></div><div class="cm-b">${esc(data.text||'')}</div>`;
   }
-  w.id='m_'+id;el.appendChild(w);el.scrollTop=el.scrollHeight;
+  el.appendChild(w);el.scrollTop=el.scrollHeight;
 }
-
-async function persistMsg(msg){if(!dbRef)return;try{await dbRef.collection('kong_chat').doc(msg.id).set(msg);}catch(e){}}
-async function loadHistory(){if(!dbRef)return;try{const snap=await dbRef.collection('kong_chat').orderBy('ts').limit(30).get();snap.forEach(d=>renderMsg(d.id,d.data()));}catch(e){}}
-
+function sysMsg(text){renderMsg({type:'system',text,ts:Date.now()});}
 function sendChat(text){
   const inp=document.getElementById('chatInp');
   const val=(text||inp.value).trim();if(!val)return;
   if(!text)inp.value='';
-  const cp=P[curP];
-  const id='msg_'+Date.now()+'_'+myUID.slice(-4);
-  const msg={id,uid:myUID,name:cp.name,text:val,ts:Date.now(),type:'chat'};
-  renderMsg(id,msg);
-  if(roomRef)try{roomRef.emit('chat',msg);}catch(e){}
-  persistMsg(msg);
+  socket?.emit('chat_msg',{nick:myNick,text:val,ts:Date.now(),type:'chat'});
 }
 function qr(t){sendChat(t);}
-function postSys(text){
-  const id='sys_'+Date.now();
-  const msg={id,uid:'system',name:'系統',text,ts:Date.now(),type:'system'};
-  renderMsg(id,msg);persistMsg(msg);
-}
 document.getElementById('chatInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
 
-let lastAI=0;
-async function reqAIComment(ctx){
-  if(!sampleRef||Date.now()-lastAI<9000)return;lastAI=Date.now();
-  document.getElementById('typingRow').classList.add('show');
-  document.getElementById('chatMsgs').scrollTop=9999;
-  try{
-    const res=await sampleRef(`你是金剛爬塔回合賽解說員，繁體中文，幽默，40字內，1個emoji。狀況：${ctx}`,{modelTier:'quick'});
-    document.getElementById('typingRow').classList.remove('show');
-    const id='ai_'+Date.now();
-    const msg={id,uid:'ai_host',name:'🤖 解說員',text:res.text,ts:Date.now(),type:'chat'};
-    renderMsg(id,msg);
-    if(roomRef)try{roomRef.emit('chat',msg);}catch(e){}
-    persistMsg(msg);
-  }catch(e){document.getElementById('typingRow').classList.remove('show');}
-}
-function toAIComment(){reqAIComment(`${P[curP].name}分數${score}，第${level}關`);}
-
-// Toast
+// ══ TOAST ══
 let tTmr=null;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');if(tTmr)clearTimeout(tTmr);tTmr=setTimeout(()=>el.classList.remove('show'),3200);}
 
-// Boot
-const sn=localStorage.getItem('kongNick');if(sn)document.getElementById('p1Nick').value=sn;
-initCapabilities(false);
+// ══ BOOT ══
+setupCanvas(); buildLevel(1);
+const sn=localStorage.getItem('kongNick');
+if(sn) document.getElementById('nickInp').value=sn;
+// Auto-join from URL
+const params=new URLSearchParams(location.search);
+if(params.get('room')){
+  document.getElementById('codeInp').value=params.get('room');
+}
+// Start render loop even before game
+loop();
 </script>
 </body>
 </html>
