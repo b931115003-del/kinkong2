@@ -212,6 +212,29 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     </div>
   </div>
 
+  <!-- 對手資訊列（對戰模式才顯示）-->
+  <div id="oppInfoRow" style="display:none;width:100%;background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.2);border-radius:10px;padding:8px 14px;margin-bottom:5px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="font-size:11px;color:var(--teal);font-weight:700;">🎮 <span id="oppNameD">對手</span></div>
+        <div style="font-size:9px;color:var(--text2);" id="oppLvlD">尚未加入</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="text-align:center;">
+          <div style="font-size:16px;font-weight:900;color:var(--teal);" id="oppScoreD">0</div>
+          <div style="font-size:9px;color:var(--text2);">分數</div>
+        </div>
+        <div style="font-size:13px;" id="oppLivesD" style="opacity:.4;">❤️❤️❤️</div>
+      </div>
+      <div style="flex:1;min-width:80px;max-width:120px;">
+        <div style="font-size:9px;color:var(--text2);margin-bottom:3px;">高度</div>
+        <div style="height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;">
+          <div style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal),#0860a0);width:0%;transition:width .2s;" id="oppHbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- 邀請碼（對戰模式才顯示）-->
   <div id="gameInviteRow" style="display:none;width:100%;background:rgba(6,214,160,.06);border:1px solid rgba(6,214,160,.25);border-radius:10px;padding:11px 14px;margin-bottom:6px;">
     <div style="font-size:10px;color:var(--text2);margin-bottom:6px;line-height:1.6;">
@@ -568,11 +591,15 @@ function draw(){
 // ═══════════════════════════════════════
 function onHit(){
   lives--;snd('hit');updateHUD();
+  if(!soloMode) socket?.emit('game_event',{type:'dead',score,lives,level,nick:myNick});
   if(lives<=0){
     gState='gameover';setTimeout(()=>snd('death'),300);
+    if(!soloMode) socket?.emit('game_event',{type:'gameover',score,lives:0,level,nick:myNick});
+    sysMsg(`💀 ${myNick} 遊戲結束！分數 ${score}`);
     showOv('💀','遊戲結束',`分數 ${score}`,
       `<button class="btn btn-red" onclick="restartGame()">再來一局</button><button class="btn" onclick="goLobby()">回大廳</button>`);
   } else {
+    sysMsg(`💥 ${myNick} 被擊中！剩 ${lives} 命`);
     showOv('💥','被擊中！',`剩 ${lives} 命`,
       `<button class="btn btn-red" onclick="respawn()">繼續 ▶</button><button class="btn" onclick="restartGame()">重開</button>`);
   }
@@ -597,7 +624,10 @@ function onWin(){
         `<button class="btn btn-green" onclick="nextSoloLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
     }
   } else {
-    showOv('🏆','過關！',`分數 ${score}`,
+    socket?.emit('game_event',{type:'win',score,lives,level,nick:myNick});
+    socket?.emit('score_update',{score,lives,level,nick:myNick});
+    sysMsg(`🏆 ${myNick} 以 ${score} 分完成第 ${level} 關！`);
+    showOv('🏆','過關！',`分數 ${score}　第 ${level} 關`,
       `<button class="btn btn-green" onclick="nextOnlineLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
   }
 }
@@ -754,12 +784,15 @@ function joinRoom(){
 function showGame(){
   document.getElementById('lobby').style.display='none';
   document.getElementById('game').style.display='block';
-  // 設定 canvas 大小（game 已顯示，可正確計算）
   cv.width=Math.min(window.innerWidth-18,540);
   cv.height=Math.round(cv.width*1.28);
   buildLevel(1);
   updateHUD();
-  // 啟動 loop
+  // 單人 vs 對戰 UI 切換
+  const isOnline=!soloMode;
+  document.getElementById('oppInfoRow').style.display=isOnline?'block':'none';
+  document.getElementById('gameInviteRow').style.display='none'; // 建立房間時再顯示
+  document.getElementById('chatBox').style.display=isOnline?'block':'none';
   if(frameId) cancelAnimationFrame(frameId);
   frameId=null;
   loop();
@@ -770,6 +803,7 @@ function goLobby(){
   gState='idle';soloMode=false;oppConnected=false;
   document.getElementById('chatBox').style.display='none';
   document.getElementById('gameInviteRow').style.display='none';
+  document.getElementById('oppInfoRow').style.display='none';
   document.getElementById('lobby').style.display='block';
   document.getElementById('game').style.display='none';
   hideOv();
@@ -790,32 +824,62 @@ function connectSocket(){
     const others=data.players.filter(p=>p.id!==socket.id);
     if(others.length>0&&!oppConnected){
       oppConnected=true;
-      const oppNick=others[0].nick||'朋友';
-      // 1. Toast 通知
-      toast(`👥 ${oppNick} 加入了！`);
-      // 2. 聊天室系統訊息
-      sysMsg(`🎮 ${oppNick} 加入房間，遊戲開始！`);
-      // 3. 邀請碼區換成「已連線」狀態
+      const oNick=others[0].nick||'朋友';
+      toast(`👥 ${oNick} 加入了！`);
+      // 更新對手面板
+      document.getElementById('oppNameD').textContent=oNick;
+      document.getElementById('oppLvlD').textContent='已加入！';
+      document.getElementById('oppLivesD').style.opacity='1';
+      // 更新邀請列
       const invRow=document.getElementById('gameInviteRow');
       if(invRow){
         invRow.style.borderColor='rgba(245,166,35,.5)';
         invRow.style.background='rgba(245,166,35,.06)';
-        invRow.innerHTML=`
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-            <div style="font-size:22px;">🤝</div>
-            <div style="flex:1;">
-              <div style="font-size:14px;font-weight:800;color:var(--gold);">${oppNick} 已加入！</div>
-              <div style="font-size:11px;color:var(--text2);margin-top:2px;">雙方都在線，開始對戰吧！</div>
-            </div>
-            <div style="width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(6,214,160,.6);animation:pulse 1.5s infinite;flex-shrink:0;"></div>
-          </div>`;
+        invRow.innerHTML=`<div style="display:flex;align-items:center;gap:10px;">
+          <div style="font-size:20px;">🤝</div>
+          <div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--gold);">${oNick} 已加入！</div>
+          <div style="font-size:11px;color:var(--text2);">雙方都在線，開始對戰！</div></div>
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(6,214,160,.5);animation:pulse 1.5s infinite;"></div>
+        </div>`;
       }
-      // 4. 開場覆蓋層也更新
-      showOv('🤝',`${oppNick} 已加入！`,'雙方都在線，開始對戰吧！',
+      showOv('🤝',`${oNick} 已加入！`,'雙方都在線，開始對戰吧！',
         `<button class="btn btn-red" onclick="beginGame()">▶ 開始遊戲！</button>`);
+      // 廣播系統訊息給雙方
+      const msg={type:'system',text:`🎮 ${oNick} 加入房間！遊戲開始！`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
+      renderMsg(msg);
+      socket.emit('chat_msg',msg);
     }
   });
-  socket.on('chat_msg',data=>renderMsg(data));
+
+  // 收到對方位置/分數/關卡
+  socket.on('pos',data=>{
+    if(data.nick===myNick) return; // 忽略自己的回聲
+    // 更新對手 HUD
+    document.getElementById('oppScoreD').textContent=data.score||0;
+    document.getElementById('oppLvlD').textContent=`第 ${data.level||1} 關`;
+    const lh=(data.lives||0)>0?'❤️'.repeat(Math.max(0,data.lives))+'🖤'.repeat(Math.max(0,3-data.lives)):'💀';
+    document.getElementById('oppLivesD').textContent=lh;
+    document.getElementById('oppHbar').style.width=(data.h||0)+'%';
+  });
+
+  // 收到對方遊戲事件（過關、死亡）
+  socket.on('game_event',data=>{
+    if(data.nick===myNick) return;
+    if(data.type==='win'){
+      const msg={type:'system',text:`🏆 ${data.nick} 以 ${data.score} 分完成第 ${data.level} 關！`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
+      renderMsg(msg);
+    } else if(data.type==='dead'){
+      const msg={type:'system',text:`💥 ${data.nick} 被擊中！剩 ${data.lives} 命`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
+      renderMsg(msg);
+    } else if(data.type==='gameover'){
+      const msg={type:'system',text:`💀 ${data.nick} 遊戲結束，最終分數 ${data.score}`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
+      renderMsg(msg);
+    }
+  });
+
+  socket.on('chat_msg',data=>{
+    if(data.nick!==myNick) renderMsg(data); // 只顯示對方的，自己的已本地顯示
+  });
   socket.on('chat_history',msgs=>msgs.forEach(m=>renderMsg(m)));
 }
 
@@ -838,16 +902,26 @@ function renderMsg(data){
   }
   el.appendChild(w);el.scrollTop=el.scrollHeight;
 }
-function sysMsg(text){renderMsg({type:'system',text,ts:Date.now(),nick:'系統'});}
+// sysMsg — 本地顯示 + 廣播給對方
+function sysMsg(text){
+  const msg={type:'system',text,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
+  renderMsg(msg);
+  if(socket&&!soloMode) socket.emit('chat_msg',msg);
+}
+
+// sendChat — 自己打的字也廣播
 function sendChat(text){
   const inp=document.getElementById('chatInp');
   const val=(text||inp.value).trim();if(!val)return;
   if(!text)inp.value='';
   const msg={nick:myNick,text:val,ts:Date.now(),type:'chat',id:'m'+Date.now()};
-  renderMsg(msg);socket?.emit('chat_msg',msg);
+  renderMsg(msg); // 自己先顯示
+  if(socket&&!soloMode) socket.emit('chat_msg',msg); // 廣播給對方
 }
 function qr(t){sendChat(t);}
-document.getElementById('chatInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
+document.getElementById('chatInp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
+});
 
 // ═══════════════════════════════════════
 //  TOAST
