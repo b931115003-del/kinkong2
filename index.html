@@ -3,108 +3,97 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>金剛爬塔 — 線上對戰</title>
+<title>金剛爬塔 — 單人 & 線上對戰</title>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{--bg:#09091a;--gold:#f5a623;--teal:#00c8f0;--red:#e94560;--green:#06d6a0;--text:#e0e0f0;--text2:#6060a0;}
 body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,#180838 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,#081828 0%,transparent 50%);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:0 8px 14px;overflow-x:hidden;}
-.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 16px;font-size:13px;font-weight:600;border-radius:9px;cursor:pointer;transition:all .17s;border:1px solid #282858;color:#c0c0e8;background:linear-gradient(155deg,#1e1e40,#111128);box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer;transition:all .17s;border:1px solid #282858;color:#c0c0e8;background:linear-gradient(155deg,#1e1e40,#111128);box-shadow:0 3px 10px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.05);}
 .btn:hover{border-color:rgba(0,200,240,.4);color:var(--teal);transform:translateY(-2px);}
 .btn:active{transform:translateY(1px);}
 .btn-red{background:linear-gradient(135deg,#e94560,#8e1830);border:none;color:#fff;box-shadow:0 3px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);}
-.btn-red:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(233,69,96,.55);}
-.btn-green{background:linear-gradient(135deg,#06b060,#047a40);border:none;color:#fff;box-shadow:0 3px 16px rgba(6,160,80,.35),inset 0 1px 0 rgba(255,255,255,.12);}
+.btn-red:hover{transform:translateY(-2px);}
+.btn-green{background:linear-gradient(135deg,#06b060,#047a40);border:none;color:#fff;}
 .btn-green:hover{transform:translateY(-2px);}
 
-/* ══ LOBBY ══ */
-#lobby{width:100%;max-width:420px;margin-top:20px;}
+/* LOBBY */
+#lobby{width:100%;max-width:440px;margin-top:16px;}
 .card{background:linear-gradient(145deg,#141430,#0a0a1e);border:1px solid #252560;border-radius:18px;padding:26px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.7);}
-.ltitle{font-size:26px;font-weight:900;color:var(--gold);text-align:center;letter-spacing:2px;text-shadow:0 0 20px rgba(245,166,35,.4);}
-.lsub{font-size:12.5px;color:var(--text2);text-align:center;margin:4px 0 20px;line-height:1.5;}
-.field{display:flex;align-items:center;gap:8px;margin-bottom:11px;}
+.ltitle{font-size:26px;font-weight:900;color:var(--gold);text-align:center;letter-spacing:2px;text-shadow:0 0 24px rgba(245,166,35,.5);}
+.lsub{font-size:12.5px;color:var(--text2);text-align:center;margin:4px 0 18px;line-height:1.5;}
+.field{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
 .field label{font-size:12px;color:var(--text2);flex-shrink:0;width:48px;}
 .field input{flex:1;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;outline:none;}
-.field input:focus{border-color:rgba(100,80,200,.5);box-shadow:0 0 0 2px rgba(100,80,200,.1);}
-.sep{display:flex;align-items:center;gap:10px;margin:16px 0;}
+.field input:focus{border-color:rgba(100,80,200,.5);}
+.sep{display:flex;align-items:center;gap:10px;margin:14px 0;}
 .sep-line{flex:1;height:1px;background:#1e1e40;}
 .sep-txt{font-size:11px;color:#2a2a60;letter-spacing:1px;}
-.lobby-btns{display:flex;flex-direction:column;gap:9px;}
-.lbtn{width:100%;padding:13px;font-size:14px;font-weight:800;border-radius:12px;border:none;cursor:pointer;transition:all .17s;letter-spacing:.4px;}
-.lbtn:hover{transform:translateY(-2px);}
 
-/* invite/join box */
-.box{margin-top:14px;padding:14px 16px;border-radius:12px;}
-.box-green{background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);}
-.box-teal{background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.2);}
-.box-title{font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;}
-.invite-link{font-size:11px;color:var(--teal);font-family:monospace;word-break:break-all;padding:8px 10px;background:#07071e;border:1px solid rgba(0,200,240,.2);border-radius:7px;margin:6px 0;cursor:pointer;}
-.waiting{display:flex;align-items:center;gap:8px;margin-top:10px;}
+/* DIFFICULTY BUTTONS */
+.diff-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px;}
+.diff-btn{padding:9px 6px;border-radius:9px;cursor:pointer;border:1px solid #252550;background:#0e0e28;color:var(--text2);font-size:12px;font-weight:700;text-align:center;transition:all .17s;line-height:1.4;}
+.diff-btn.active{transform:scale(1.04);}
+.diff-btn span{display:block;font-size:10px;font-weight:400;margin-top:2px;opacity:.7;}
+
+.lbtn{width:100%;padding:13px;font-size:14px;font-weight:800;border-radius:12px;border:none;cursor:pointer;transition:all .17s;letter-spacing:.4px;margin-bottom:9px;color:#fff;}
+.lbtn:last-child{margin-bottom:0;}
+.lbtn:hover{transform:translateY(-2px);}
+.code-inp{width:100%;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:18px;font-weight:700;color:var(--gold);letter-spacing:5px;text-align:center;font-family:monospace;outline:none;margin-bottom:8px;}
+.code-inp:focus{border-color:rgba(0,200,240,.5);}
+.invite-box{margin-top:12px;padding:12px 14px;background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);border-radius:10px;display:none;}
+.invite-code-big{font-size:30px;font-weight:900;color:var(--gold);letter-spacing:7px;text-align:center;padding:8px;background:#07071e;border-radius:8px;border:1px solid rgba(245,166,35,.2);font-family:monospace;margin:6px 0;}
+.waiting{display:flex;align-items:center;gap:8px;margin-top:9px;}
 .wdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.code-inp{width:100%;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:16px;font-weight:700;color:var(--gold);letter-spacing:4px;text-align:center;font-family:monospace;outline:none;margin-bottom:8px;}
-.code-inp:focus{border-color:rgba(0,200,240,.5);}
 
-/* ══ GAME ══ */
+/* GAME */
 #game{display:none;width:100%;max-width:560px;}
-header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;}
-.logo{font-size:17px;font-weight:900;letter-spacing:2px;color:var(--gold);}
+header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;gap:8px;flex-wrap:wrap;}
+.logo{font-size:18px;font-weight:900;letter-spacing:2px;color:var(--gold);text-shadow:0 0 16px rgba(245,166,35,.4);}
 
-/* Score bar */
-.score-bar{width:100%;display:flex;align-items:center;gap:6px;margin-bottom:5px;}
-.pc{flex:1;padding:8px 11px;border-radius:11px;}
-.pc-me{background:linear-gradient(135deg,rgba(233,69,96,.14),rgba(233,69,96,.04));border:1px solid rgba(233,69,96,.3);}
-.pc-opp{background:linear-gradient(135deg,rgba(0,200,240,.1),rgba(0,200,240,.04));border:1px solid rgba(0,200,240,.2);}
-.pc-name{font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;margin-bottom:3px;}
-.pc-score{font-size:20px;font-weight:900;line-height:1;}
-.pc-lives{font-size:12px;margin-top:2px;}
-.pc-status{font-size:9px;color:var(--text2);margin-top:1px;}
-.live-dot{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:3px;}
-.vs-mid{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 3px;}
-.vs-txt{font-size:10px;font-weight:900;color:#282858;letter-spacing:2px;}
+/* HUD */
+.hud-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;flex-wrap:wrap;}
+.hud-block{text-align:center;padding:6px 12px;border-radius:9px;background:linear-gradient(160deg,#1c1c38,#0e0e22);border:1px solid #252550;box-shadow:0 2px 8px rgba(0,0,0,.35);}
+.hud-val{font-size:17px;font-weight:800;line-height:1;}
+.hud-label{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:.8px;text-transform:uppercase;}
+.hbar-wrap{flex:1;height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;}
+.hbar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),#c02040);transition:width .2s;}
 
-/* height bars */
-.hbars{width:100%;display:flex;gap:5px;margin:3px 0 5px;}
-.hb-wrap{flex:1;display:flex;align-items:center;gap:5px;}
-.hb-label{font-size:9px;width:22px;flex-shrink:0;}
-.hb-bg{flex:1;height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;}
-.hb{height:100%;border-radius:2px;transition:width .2s;}
-.hb-me{background:linear-gradient(90deg,var(--red),#c02040);}
-.hb-opp{background:linear-gradient(90deg,var(--teal),#0860a0);}
-
-/* canvas */
+/* CANVAS */
 .canvas-wrap{position:relative;width:100%;}
-#gc{display:block;border-radius:12px;image-rendering:pixelated;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.7),0 0 0 2px rgba(255,255,255,.04);}
-.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;gap:8px;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(8px);background:rgba(5,5,20,.9);}
+#gc{display:block;border-radius:12px;image-rendering:pixelated;width:100%;outline:none;cursor:pointer;box-shadow:0 8px 40px rgba(0,0,0,.7),0 0 0 2px rgba(255,255,255,.04);}
+
+/* OVERLAY */
+.ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;gap:9px;background:rgba(5,5,20,.9);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s;}
 .ov.show{opacity:1;pointer-events:all;}
 .ov-em{font-size:50px;line-height:1;}
 .ov-ttl{font-size:21px;font-weight:900;text-align:center;}
 .ov-ttl.gold{color:var(--gold);text-shadow:0 0 20px rgba(245,166,35,.4);}
 .ov-ttl.red{color:var(--red);}
-.ov-ttl.teal{color:var(--teal);}
-.ov-sub{font-size:12px;color:var(--text2);text-align:center;max-width:260px;line-height:1.5;}
+.ov-sub{font-size:12px;color:var(--text2);text-align:center;max-width:260px;line-height:1.6;}
 .ov-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
 
-/* dpad */
-.ctrl{display:flex;align-items:center;justify-content:center;gap:14px;margin:7px 0 3px;}
+/* DPAD */
+.ctrl-row{display:flex;align-items:center;justify-content:center;gap:14px;margin:7px 0 3px;}
 .dpw{padding:9px;border-radius:16px;background:linear-gradient(145deg,#111128,#0a0a1a);border:1px solid #1e1e40;box-shadow:0 5px 20px rgba(0,0,0,.55);}
 .dp{display:grid;grid-template-areas:". up ." "left . right";gap:4px;}
-.db{width:52px;height:52px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;color:#9090c8;background:linear-gradient(145deg,#232345,#141432);border:1px solid #2e2e60;box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.45);transition:all .1s;position:relative;overflow:hidden;}
-.db::after{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(to bottom,rgba(255,255,255,.07),transparent);pointer-events:none;}
+.db{width:52px;height:52px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;color:#9090c8;background:linear-gradient(145deg,#232345,#141432);border:1px solid #2e2e60;box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.45);transition:all .1s;position:relative;overflow:hidden;border-radius:9px;}
 .db.up{grid-area:up;border-radius:11px 11px 5px 5px;}
 .db.left{grid-area:left;border-radius:11px 5px 5px 11px;}
 .db.right{grid-area:right;border-radius:5px 11px 11px 5px;}
+.db::after{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(to bottom,rgba(255,255,255,.07),transparent);pointer-events:none;}
 .db:active,.db.pressed{color:var(--red);border-color:var(--red);background:linear-gradient(145deg,#180a10,#0e0608);box-shadow:0 1px 3px rgba(0,0,0,.5),0 0 12px rgba(233,69,96,.22),inset 0 2px 5px rgba(0,0,0,.5);transform:scale(.93);}
-.jb{width:54px;height:54px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;background:linear-gradient(135deg,#e94560,#8e1830);border:none;color:#fff;box-shadow:0 4px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.15);}
+.jb{width:54px;height:54px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;background:linear-gradient(135deg,#e94560,#8e1830);border:none;color:#fff;box-shadow:0 4px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.15);}
 .jb:active{transform:scale(.92);}
 .hint{font-size:10px;color:#2a2a56;text-align:center;margin-bottom:4px;}
 
-/* chat */
+/* CHAT */
 .chat{background:linear-gradient(145deg,#0e0e28,#080818);border:1px solid #1a1a3a;border-radius:12px;overflow:hidden;margin-top:6px;}
-.chat-hdr{padding:7px 12px 6px;border-bottom:1px solid #161630;display:flex;align-items:center;justify-content:space-between;}
-.cdot{width:7px;height:7px;border-radius:50%;background:#3a3a68;flex-shrink:0;}
+.chat-hdr{padding:7px 12px 5px;border-bottom:1px solid #161630;display:flex;align-items:center;justify-content:space-between;}
+.cdot{width:7px;height:7px;border-radius:50%;background:#3a3a68;}
 .cdot.on{background:var(--green);box-shadow:0 0 6px rgba(6,214,160,.5);animation:pulse 2s infinite;}
-.chat-msgs{height:130px;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:4px;}
+.chat-msgs{height:120px;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:4px;}
 .chat-msgs::-webkit-scrollbar{width:3px;}
 .chat-msgs::-webkit-scrollbar-thumb{background:#1e1e3a;border-radius:2px;}
 .cm{display:flex;flex-direction:column;gap:1px;animation:fu .2s;}
@@ -112,10 +101,10 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 .cm.me{align-self:flex-end;}.cm.op{align-self:flex-start;}.cm.sy{align-self:center;}
 .cm-meta{display:flex;align-items:center;gap:4px;padding:0 3px;}
 .cm.me .cm-meta{flex-direction:row-reverse;}
-.cm-ava{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
+.cm-ava{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;}
 .cm-name{font-size:9.5px;color:var(--text2);}
 .cm-time{font-size:8.5px;color:#1e1e48;}
-.cm-b{padding:6px 10px;font-size:12px;line-height:1.4;word-break:break-word;max-width:220px;}
+.cm-b{padding:5px 9px;font-size:12px;line-height:1.4;word-break:break-word;max-width:220px;}
 .cm.me .cm-b{background:linear-gradient(135deg,rgba(233,69,96,.18),rgba(233,69,96,.07));border:1px solid rgba(233,69,96,.2);border-radius:9px 9px 2px 9px;color:#f0b8c0;}
 .cm.op .cm-b{background:linear-gradient(135deg,rgba(0,200,240,.1),rgba(0,200,240,.03));border:1px solid rgba(0,200,240,.16);border-radius:9px 9px 9px 2px;color:#a8e0f0;}
 .cm.sy .cm-b{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.14);border-radius:7px;font-size:10.5px;color:var(--gold);text-align:center;padding:4px 10px;}
@@ -125,21 +114,18 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 .chat-inp-row{display:flex;gap:5px;padding:6px 10px 8px;border-top:1px solid #121228;}
 .cinp{flex:1;background:#07071e;border:1px solid #202050;border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
 .cinp:focus{border-color:rgba(100,80,200,.5);}
-.csend{padding:7px 12px;border-radius:7px;background:linear-gradient(135deg,#4030a0,#2a1870);border:none;color:#c0b0f0;cursor:pointer;font-size:14px;transition:all .15s;}
-.csend:hover{background:linear-gradient(135deg,#5040c0,#3a2890);}
+.csend{padding:7px 12px;border-radius:7px;background:linear-gradient(135deg,#4030a0,#2a1870);border:none;color:#c0b0f0;cursor:pointer;font-size:14px;}
 
-/* toast */
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);opacity:0;background:linear-gradient(135deg,#141432,#0a0a1e);border:1px solid rgba(245,166,35,.3);border-radius:12px;padding:9px 16px;font-size:12.5px;color:var(--gold);max-width:320px;text-align:center;z-index:999;transition:all .35s;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
 </style>
 </head>
 <body>
 
-<!-- ══ LOBBY ══ -->
+<!-- LOBBY -->
 <div id="lobby">
-  <br>
   <div class="card">
-    <div style="font-size:40px;text-align:center;margin-bottom:5px;">🦍</div>
+    <div style="font-size:38px;text-align:center;margin-bottom:4px;">🦍</div>
     <div class="ltitle">金剛爬塔</div>
     <div class="lsub">躲避滾桶 · 爬上頂端救出公主！</div>
 
@@ -148,117 +134,94 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
       <input id="nickInp" placeholder="輸入你的暱稱…" maxlength="12" value="玩家">
     </div>
 
-    <div class="lobby-btns">
-      <!-- 單人模式 -->
-      <button class="lbtn" onclick="startSolo()"
-        style="color:#fff;background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);">
-        🎮 單人練習
+    <!-- 難度選擇（單人用） -->
+    <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:8px;">🎯 單人難度</div>
+    <div class="diff-row">
+      <button class="diff-btn" id="d-easy" onclick="setDiff('easy')" style="border-color:rgba(6,214,160,.4);color:#06d6a0;">
+        😊 簡單<span>5命・慢桶</span>
       </button>
-
-      <div class="sep"><div class="sep-line"></div><div class="sep-txt">線上對戰</div><div class="sep-line"></div></div>
-
-      <!-- 建立房間 -->
-      <button class="lbtn" onclick="createRoom()"
-        style="color:#fff;background:linear-gradient(135deg,#e94560,#8e1830);box-shadow:0 4px 20px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);">
-        🔗 建立房間 · 邀請朋友
+      <button class="diff-btn active" id="d-normal" onclick="setDiff('normal')" style="border-color:var(--gold);background:rgba(245,166,35,.1);color:var(--gold);box-shadow:0 0 0 1px rgba(245,166,35,.2);">
+        🧑 普通<span>3命・標準</span>
       </button>
-
-      <div class="sep"><div class="sep-line"></div><div class="sep-txt">或</div><div class="sep-line"></div></div>
-
-      <!-- 加入房間 -->
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <input class="code-inp" id="codeInp" placeholder="輸入邀請碼" maxlength="8">
-        <button class="lbtn" onclick="joinRoom()"
-          style="color:#fff;background:linear-gradient(135deg,#06b060,#047a40);box-shadow:0 4px 20px rgba(6,160,80,.35),inset 0 1px 0 rgba(255,255,255,.12);">
-          ✅ 加入朋友的房間
-        </button>
-      </div>
+      <button class="diff-btn" id="d-hard" onclick="setDiff('hard')" style="border-color:rgba(233,69,96,.4);color:#ff8090;">
+        💀 困難<span>2命・快桶</span>
+      </button>
     </div>
 
-    <!-- 建立後顯示邀請資訊 -->
-    <div class="box box-green" id="inviteBox" style="display:none;">
-      <div class="box-title" style="color:var(--green);">📋 傳給朋友</div>
-      <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">邀請碼：</div>
-      <div style="font-size:28px;font-weight:900;color:var(--gold);letter-spacing:6px;text-align:center;padding:8px;background:#07071e;border-radius:8px;border:1px solid rgba(245,166,35,.2);font-family:monospace;" id="roomCodeDisp"></div>
-      <div style="font-size:11px;color:var(--text2);margin:8px 0 4px;">或複製連結：</div>
-      <div class="invite-link" id="inviteLinkDisp" onclick="copyLink()">點擊複製連結</div>
-      <div style="display:flex;gap:7px;margin-top:6px;">
+    <!-- 單人按鈕 -->
+    <button class="lbtn" onclick="startSolo()" style="background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);">
+      🎮 單人開始（共 5 關）
+    </button>
+
+    <div class="sep"><div class="sep-line"></div><div class="sep-txt">線上對戰</div><div class="sep-line"></div></div>
+
+    <button class="lbtn" onclick="createRoom()" style="background:linear-gradient(135deg,#e94560,#8e1830);box-shadow:0 4px 20px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);">
+      🔗 建立房間 · 邀請朋友
+    </button>
+
+    <div class="sep"><div class="sep-line"></div><div class="sep-txt">或</div><div class="sep-line"></div></div>
+
+    <input class="code-inp" id="codeInp" placeholder="輸入邀請碼" maxlength="8">
+    <button class="lbtn" onclick="joinRoom()" style="background:linear-gradient(135deg,#06b060,#047a40);box-shadow:0 4px 20px rgba(6,160,80,.35),inset 0 1px 0 rgba(255,255,255,.12);">
+      ✅ 加入朋友的房間
+    </button>
+
+    <div class="invite-box" id="inviteBox">
+      <div style="font-size:11px;color:var(--text2);">📋 把邀請碼傳給朋友：</div>
+      <div class="invite-code-big" id="roomCodeDisp"></div>
+      <div style="display:flex;gap:7px;">
         <button class="btn btn-green" style="font-size:11.5px;padding:6px 12px;flex:1;" onclick="copyLink()">📋 複製連結</button>
         <button class="btn" style="font-size:11.5px;padding:6px 12px;flex:1;" onclick="shareLink()">📤 分享</button>
       </div>
-      <div class="waiting" id="waitRow">
-        <div class="wdot"></div>
-        <div style="font-size:12px;color:var(--green);" id="waitTxt">等待朋友輸入邀請碼加入…</div>
-      </div>
+      <div class="waiting"><div class="wdot"></div><div style="font-size:12px;color:var(--green);" id="waitTxt">等待朋友輸入邀請碼加入…</div></div>
     </div>
   </div>
 </div>
 
-<!-- ══ GAME ══ -->
-<div id="game">
+<!-- GAME -->
+<div id="game" onclick="if(document.activeElement.tagName!=='INPUT')focusGame()">
   <header>
     <div class="logo">金剛爬塔 🦍</div>
     <div style="display:flex;gap:5px;">
-      <button class="btn" id="soundBtn" style="font-size:14px;padding:5px 10px;" onclick="toggleSound()" title="關閉音效">🔊</button>
-      <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="restartMe()">⟳ 重開</button>
-      <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="backLobby()">← 大廳</button>
+      <button class="btn" id="soundBtn" style="font-size:14px;padding:5px 10px;" onclick="toggleSound()">🔊</button>
+      <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="restartGame()">⟳ 重開</button>
+      <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="goLobby()">← 大廳</button>
     </div>
   </header>
 
-  <!-- Score bar -->
-  <div class="score-bar">
-    <div class="pc pc-me">
-      <div class="pc-name" style="color:#ff8090;">
-        <span class="live-dot" style="background:var(--green);box-shadow:0 0 5px rgba(6,214,160,.5);"></span>
-        👤 <span id="myNameD">我</span>
-      </div>
-      <div class="pc-score" style="color:var(--gold);" id="myScoreD">0</div>
-      <div class="pc-lives" id="myLivesD">❤️❤️❤️</div>
-      <div class="pc-status" id="myStatusD">第 1 關</div>
+  <!-- HUD -->
+  <div class="hud-row">
+    <div class="hud-block">
+      <div class="hud-val" style="color:var(--gold);" id="hudScore">0</div>
+      <div class="hud-label">分數</div>
     </div>
-    <div class="vs-mid" id="vsMid">
-      <div class="vs-txt">VS</div>
-      <div style="font-size:9px;color:#1e1e48;" id="roomCodeSmall"></div>
+    <div class="hud-block">
+      <div class="hud-val" style="color:var(--red);" id="hudLives">❤️❤️❤️</div>
+      <div class="hud-label">生命</div>
     </div>
-    <div class="pc pc-opp" id="oppPanel">
-      <div class="pc-name" style="color:var(--teal);justify-content:flex-end;">
-        🎮 <span id="oppNameD">等待中…</span>
-        <span class="live-dot" id="oppOnlineDot" style="background:#3a3a68;"></span>
-      </div>
-      <div class="pc-score" style="color:var(--teal);text-align:right;" id="oppScoreD">0</div>
-      <div class="pc-lives" style="text-align:right;opacity:.4;" id="oppLivesD">❤️❤️❤️</div>
-      <div class="pc-status" style="text-align:right;" id="oppStatusD">尚未加入</div>
+    <div class="hud-block" style="flex:1;display:flex;align-items:center;gap:8px;">
+      <div style="font-size:9px;color:#ff8090;white-space:nowrap;">高度</div>
+      <div class="hbar-wrap"><div class="hbar" id="hbar" style="width:0%"></div></div>
     </div>
-  </div>
-
-  <!-- Height bars -->
-  <div class="hbars">
-    <div class="hb-wrap">
-      <div class="hb-label" style="color:#ff8090;text-align:right;">高度</div>
-      <div class="hb-bg"><div class="hb hb-me" id="myHbar" style="width:0%"></div></div>
-    </div>
-    <div style="font-size:9px;color:#1e1e48;padding:0 4px;">↕</div>
-    <div class="hb-wrap" style="flex-direction:row-reverse;" id="oppHbarRow">
-      <div class="hb-label" style="color:var(--teal);">高度</div>
-      <div class="hb-bg"><div class="hb hb-opp" id="oppHbar" style="width:0%"></div></div>
+    <div class="hud-block">
+      <div class="hud-val" style="color:var(--teal);" id="hudLevel">1</div>
+      <div class="hud-label" id="hudLevelLabel">關卡</div>
     </div>
   </div>
 
   <!-- Canvas -->
   <div class="canvas-wrap">
-    <canvas id="gc" tabindex="0" style="outline:none;cursor:pointer;" onclick="focusGame()" title="點擊畫面後使用鍵盤操控"></canvas>
-    <div class="ov show" id="mainOv">
+    <canvas id="gc" tabindex="0" onclick="focusGame()" style="outline:none;"></canvas>
+    <div class="ov" id="mainOv">
       <div class="ov-em" id="ovEm">🦍</div>
-      <div class="ov-ttl gold" id="ovTtl">等待開始</div>
-      <div class="ov-sub" id="ovSub">等待朋友加入後一起開始！</div>
-      <div class="ov-btns" id="ovBtns">
-        <button class="btn btn-red" onclick="beginGame()">▶ 開始我的回合</button>
-      </div>
+      <div class="ov-ttl gold" id="ovTtl">金剛爬塔</div>
+      <div class="ov-sub" id="ovSub"></div>
+      <div class="ov-btns" id="ovBtns"></div>
     </div>
   </div>
 
   <!-- Controls -->
-  <div class="ctrl">
+  <div class="ctrl-row">
     <div class="dpw">
       <div class="dp">
         <button class="db up" id="dUp" onpointerdown="kd('up')" onpointerup="ku('up')" onpointercancel="ku('up')">▲</button>
@@ -268,10 +231,10 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     </div>
     <button class="jb" onpointerdown="kd('jump')" onpointerup="ku('jump')" onpointercancel="ku('jump')">🦘<br><span style="font-size:9px;">跳</span></button>
   </div>
-  <div class="hint">先點擊遊戲畫面 → 再用 ← → 移動 · ↑ / 空白 跳躍</div>
+  <div class="hint">🖥️ 電腦：← → 移動 · ↑ 或 空白鍵 跳躍（不需要先點畫面）</div>
 
-  <!-- Chat -->
-  <div class="chat" id="oppChatSection">
+  <!-- Chat (hidden in solo) -->
+  <div class="chat" id="chatBox" style="display:none;">
     <div class="chat-hdr">
       <div style="display:flex;align-items:center;gap:7px;">
         <div class="cdot" id="cDot"></div>
@@ -286,11 +249,10 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     </div>
     <div class="qr-row">
       <button class="qr" onclick="qr('🔥 超猛！')">🔥猛</button>
-      <button class="qr" onclick="qr('😅 好難…')">😅難</button>
-      <button class="qr" onclick="qr('🏆 我贏了！換你！')">🏆我贏換你</button>
-      <button class="qr" onclick="qr('💀 被打中了！')">💀死了</button>
+      <button class="qr" onclick="qr('💀 被打到了！')">💀死了</button>
+      <button class="qr" onclick="qr('🏆 我過關了！')">🏆過關</button>
       <button class="qr" onclick="qr('👏 加油！')">👏加油</button>
-      <button class="qr" onclick="qr('🎯 再來一局！')">🎯再來</button>
+      <button class="qr" onclick="qr('🎯 再來！')">🎯再來</button>
     </div>
     <div class="chat-inp-row">
       <input class="cinp" id="chatInp" placeholder="說點什麼…" maxlength="80">
@@ -299,547 +261,510 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toastEl"></div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  🔊 音效引擎（Web Audio API，不需要音效檔）
-// ══════════════════════════════════════════════════
-let audioCtx = null;
-let soundEnabled = true;
-
-function getAudio() {
-  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  return audioCtx;
-}
-
-function playSound(type) {
-  if (!soundEnabled) return;
-  try {
-    const ac = getAudio();
-    const now = ac.currentTime;
-
-    switch(type) {
-
-      case 'jump': {
-        // 輕快上升音
-        const o = ac.createOscillator();
-        const g = ac.createGain();
-        o.connect(g); g.connect(ac.destination);
-        o.type = 'square';
-        o.frequency.setValueAtTime(220, now);
-        o.frequency.exponentialRampToValueAtTime(440, now + 0.12);
-        g.gain.setValueAtTime(0.18, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-        o.start(now); o.stop(now + 0.18);
-        break;
-      }
-
-      case 'barrel_roll': {
-        // 滾動低沉聲
-        const o = ac.createOscillator();
-        const g = ac.createGain();
-        const dist = ac.createWaveShaper();
-        const curve = new Float32Array(256);
-        for(let i=0;i<256;i++) curve[i]=((i/128)-1)*8;
-        dist.curve = curve;
-        o.connect(dist); dist.connect(g); g.connect(ac.destination);
-        o.type = 'sawtooth';
-        o.frequency.setValueAtTime(80 + Math.random()*20, now);
-        o.frequency.linearRampToValueAtTime(60, now + 0.15);
-        g.gain.setValueAtTime(0.08, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-        o.start(now); o.stop(now + 0.15);
-        break;
-      }
-
-      case 'hit': {
-        // 被打中：爆炸噪音
-        const buf = ac.createBuffer(1, ac.sampleRate * 0.4, ac.sampleRate);
-        const data = buf.getChannelData(0);
-        for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * Math.pow(1-i/data.length, 1.5);
-        const src = ac.createBufferSource();
-        const g = ac.createGain();
-        const filt = ac.createBiquadFilter();
-        filt.type = 'lowpass'; filt.frequency.value = 400;
-        src.buffer = buf;
-        src.connect(filt); filt.connect(g); g.connect(ac.destination);
-        g.gain.setValueAtTime(0.6, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
-        src.start(now);
-        // 加一個下降音
-        const o2 = ac.createOscillator();
-        const g2 = ac.createGain();
-        o2.connect(g2); g2.connect(ac.destination);
-        o2.type = 'sawtooth';
-        o2.frequency.setValueAtTime(300, now);
-        o2.frequency.exponentialRampToValueAtTime(60, now + 0.3);
-        g2.gain.setValueAtTime(0.3, now);
-        g2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-        o2.start(now); o2.stop(now + 0.3);
-        break;
-      }
-
-      case 'death': {
-        // 死亡：悲傷下降音階
-        const notes = [392, 330, 277, 220, 185];
-        notes.forEach((freq, i) => {
-          const o = ac.createOscillator();
-          const g = ac.createGain();
-          o.connect(g); g.connect(ac.destination);
-          o.type = 'square';
-          const t = now + i * 0.12;
-          o.frequency.setValueAtTime(freq, t);
-          g.gain.setValueAtTime(0.15, t);
-          g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-          o.start(t); o.stop(t + 0.12);
-        });
-        break;
-      }
-
-      case 'win': {
-        // 過關：勝利音階
-        const notes = [523, 659, 784, 1047];
-        notes.forEach((freq, i) => {
-          const o = ac.createOscillator();
-          const g = ac.createGain();
-          o.connect(g); g.connect(ac.destination);
-          o.type = 'square';
-          const t = now + i * 0.1;
-          o.frequency.setValueAtTime(freq, t);
-          g.gain.setValueAtTime(0.15, t);
-          g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
-          o.start(t); o.stop(t + 0.14);
-        });
-        // 加一個長音收尾
-        setTimeout(() => {
-          try {
-            const ac2 = getAudio();
-            const o = ac2.createOscillator();
-            const g = ac2.createGain();
-            o.connect(g); g.connect(ac2.destination);
-            o.type = 'sine';
-            o.frequency.value = 1047;
-            g.gain.setValueAtTime(0.2, ac2.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.001, ac2.currentTime + 0.5);
-            o.start(); o.stop(ac2.currentTime + 0.5);
-          } catch(e) {}
-        }, 420);
-        break;
-      }
-
-      case 'climb': {
-        // 爬梯：短促高音點擊
-        const o = ac.createOscillator();
-        const g = ac.createGain();
-        o.connect(g); g.connect(ac.destination);
-        o.type = 'square';
-        o.frequency.value = 660;
-        g.gain.setValueAtTime(0.06, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-        o.start(now); o.stop(now + 0.06);
-        break;
-      }
-
-      case 'barrel_land': {
-        // 桶子落地：撞擊聲
-        const buf = ac.createBuffer(1, ac.sampleRate * 0.1, ac.sampleRate);
-        const data = buf.getChannelData(0);
-        for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * (1-i/data.length);
-        const src = ac.createBufferSource();
-        const g = ac.createGain();
-        const filt = ac.createBiquadFilter();
-        filt.type = 'lowpass'; filt.frequency.value = 200;
-        src.buffer = buf;
-        src.connect(filt); filt.connect(g); g.connect(ac.destination);
-        g.gain.setValueAtTime(0.25, now);
-        g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        src.start(now);
-        break;
-      }
-
-    }
-  } catch(e) {}
-}
-
-// 音效開關按鈕狀態更新
-function toggleSound() {
-  soundEnabled = !soundEnabled;
-  document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
-  document.getElementById('soundBtn').title = soundEnabled ? '關閉音效' : '開啟音效';
-}
-
-// ══════════════════════════════════════════════════
-//  ⚠️ 請把下面這行改成你的 Render 伺服器網址！
-//  部署後長這樣：https://你的名字-kong.onrender.com
-// ══════════════════════════════════════════════════
+// ═══════════════════════════════════════
+//  SERVER URL — 改成你的 Render 網址
+// ═══════════════════════════════════════
 const SERVER_URL = 'https://kong-server-q68o.onrender.com';
 
-let socket = null;
-let myNick = '玩家';
-let myRoom = '';
-let oppData = { score:0, lives:3, level:1, x:0, y:0, h:0, state:'waiting', nick:'對手' };
-let oppConnected = false;
-let inviteLink = '';
+// ═══════════════════════════════════════
+//  DIFFICULTY
+// ═══════════════════════════════════════
+const DIFF = {
+  easy:   {lives:5, barrelMul:0.6, interval:1.6, label:'😊 簡單', color:'#06d6a0'},
+  normal: {lives:3, barrelMul:1.0, interval:1.0, label:'🧑 普通', color:'#f5a623'},
+  hard:   {lives:2, barrelMul:1.5, interval:0.65,label:'💀 困難', color:'#e94560'},
+};
+let diff = 'normal';
 
-// ══ SOCKET CONNECT ══
-function connectSocket() {
-  socket = io(SERVER_URL, { transports: ['websocket','polling'] });
-  socket.on('connect', () => {
-    document.getElementById('cDot').classList.add('on');
-    document.getElementById('cOnTxt').textContent = '伺服器已連線';
-  });
-  socket.on('disconnect', () => {
-    document.getElementById('cDot').classList.remove('on');
-    document.getElementById('cOnTxt').textContent = '連線中斷…';
-  });
-  socket.on('room_update', (data) => {
-    const others = data.players.filter(p => p.id !== socket.id);
-    if (others.length > 0 && !oppConnected) {
-      oppConnected = true;
-      oppData.nick = others[0].nick;
-      document.getElementById('oppNameD').textContent = others[0].nick;
-      document.getElementById('oppOnlineDot').style.background = 'var(--green)';
-      document.getElementById('oppOnlineDot').style.boxShadow = '0 0 5px rgba(6,214,160,.5)';
-      document.getElementById('oppStatusD').textContent = '已加入！';
-      document.getElementById('oppLivesD').style.opacity = '1';
-      document.getElementById('waitTxt').textContent = '朋友已加入！';
-      document.getElementById('waitRow').style.background = 'rgba(6,214,160,.1)';
-      toast(`👥 ${others[0].nick} 加入了！`);
-      // hide waiting overlay if showing
-      if (document.getElementById('ovTtl').textContent === '等待開始') {
-        setOv('🦍','準備好了！',`${others[0].nick} 已加入，開始吧！`,
-          `<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
-      }
-    }
-  });
-  socket.on('opp_pos', (data) => {
-    oppData = { ...oppData, ...data };
-    updateOppHUD();
-  });
-  socket.on('opp_score', (data) => {
-    oppData = { ...oppData, ...data };
-    updateOppHUD();
-  });
-  socket.on('chat_msg', (data) => renderMsg(data));
-  socket.on('chat_history', (msgs) => msgs.forEach(m => renderMsg(m)));
-  socket.on('game_event', (data) => {
-    if (data.type === 'win') {
-      sysMsg(`🏆 ${data.nick} 以 ${data.score} 分完成第 ${data.level} 關！`);
-      toast(`🏆 ${data.nick} 過關了！`);
-    } else if (data.type === 'dead') {
-      sysMsg(`💥 ${data.nick} 被擊中了！剩 ${data.lives} 命`);
-    } else if (data.type === 'gameover') {
-      sysMsg(`💀 ${data.nick} 遊戲結束，最終分數 ${data.score}`);
-    }
+function setDiff(d) {
+  diff = d;
+  ['easy','normal','hard'].forEach(k => {
+    const b = document.getElementById('d-'+k);
+    const cfg = DIFF[k];
+    const on = k === d;
+    b.style.borderColor = on ? cfg.color : cfg.color+'66';
+    b.style.background = on ? cfg.color+'18' : '';
+    b.style.color = cfg.color;
+    b.style.boxShadow = on ? `0 0 0 1px ${cfg.color}44` : 'none';
+    b.classList.toggle('active', on);
   });
 }
 
-// ══ LOBBY ══
-function createRoom() {
-  myNick = document.getElementById('nickInp').value.trim() || '玩家';
-  localStorage.setItem('kongNick', myNick);
-  myRoom = Math.random().toString(36).slice(2,8).toUpperCase();
-  const base = location.href.split('?')[0];
-  inviteLink = `${base}?room=${myRoom}`;
-  document.getElementById('inviteBox').style.display = 'block';
-  document.getElementById('roomCodeDisp').textContent = myRoom;
-  document.getElementById('inviteLinkDisp').textContent = inviteLink;
-  connectAndJoin();
-}
+// ═══════════════════════════════════════
+//  LEVEL CONFIGS
+// ═══════════════════════════════════════
+const LEVELS = [
+  {name:'第1關', desc:'入門爬塔',   bonus:300,  flameCnt:0, barrelBoost:1.0},
+  {name:'第2關', desc:'雙桶挑戰',   bonus:600,  flameCnt:1, barrelBoost:1.3},
+  {name:'第3關', desc:'三層火焰',   bonus:900,  flameCnt:2, barrelBoost:1.5},
+  {name:'第4關', desc:'速度地獄',   bonus:1200, flameCnt:2, barrelBoost:1.8},
+  {name:'第5關', desc:'最終決戰！', bonus:2000, flameCnt:3, barrelBoost:2.2},
+];
+const MAX_LVL = 5;
 
-function joinRoom() {
-  myNick = document.getElementById('nickInp').value.trim() || '玩家';
-  localStorage.setItem('kongNick', myNick);
-  const code = document.getElementById('codeInp').value.trim().toUpperCase();
-  if (!code) { toast('請輸入邀請碼！'); return; }
-  myRoom = code;
-  connectAndJoin();
+// ═══════════════════════════════════════
+//  SOUND
+// ═══════════════════════════════════════
+let AC = null, soundOn = true;
+function getAC(){ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); return AC; }
+function snd(type){
+  if(!soundOn) return;
+  try{
+    const ac=getAC(), t=ac.currentTime;
+    if(type==='jump'){ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(440,t+.12);g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.start(t);o.stop(t+.18); }
+    if(type==='hit'){ const buf=ac.createBuffer(1,ac.sampleRate*.4,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);const s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=400;s.buffer=buf;s.connect(f);f.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.4);s.start(t); }
+    if(type==='death'){ [392,330,277,220].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=f;const tt=t+i*.12;g.gain.setValueAtTime(.12,tt);g.gain.exponentialRampToValueAtTime(.001,tt+.1);o.start(tt);o.stop(tt+.12);}); }
+    if(type==='win'){ [523,659,784,1047].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=f;const tt=t+i*.1;g.gain.setValueAtTime(.12,tt);g.gain.exponentialRampToValueAtTime(.001,tt+.12);o.start(tt);o.stop(tt+.14);}); }
+    if(type==='barrel'){ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sawtooth';o.frequency.setValueAtTime(80,t);o.frequency.linearRampToValueAtTime(60,t+.15);g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);o.start(t);o.stop(t+.15); }
+    if(type==='climb'){ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=660;g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);o.start(t);o.stop(t+.06); }
+  }catch(e){}
 }
+function toggleSound(){ soundOn=!soundOn; document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇'; }
 
-let soloMode = false;
-
-function startSolo() {
-  myNick = document.getElementById('nickInp').value.trim() || '玩家';
-  localStorage.setItem('kongNick', myNick);
-  soloMode = true;
-  enterGame();
-  // Hide opponent panel in solo mode
-  document.getElementById('oppPanel').style.display = 'none';
-  document.getElementById('vsMid').style.display = 'none';
-  document.getElementById('oppHbarRow').style.display = 'none';
-  document.getElementById('oppChatSection').style.display = 'none';
-  document.getElementById('roomCodeSmall').textContent = '單人模式';
-  setOv('🦍','準備好了！','按下方向鍵或螢幕按鈕開始移動！\n空白鍵或🦘按鈕跳躍',
-    `<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
-}
-
-function connectAndJoin() {
-  soloMode = false;
-  // Show opponent panel
-  document.getElementById('oppPanel').style.display = '';
-  document.getElementById('vsMid').style.display = '';
-  document.getElementById('oppHbarRow').style.display = '';
-  document.getElementById('oppChatSection').style.display = '';
-  if (!socket || !socket.connected) connectSocket();
-  setTimeout(() => {
-    socket.emit('join_room', { roomCode: myRoom, nick: myNick });
-    enterGame();
-  }, 800);
-}
-
-function enterGame() {
-  document.getElementById('lobby').style.display = 'none';
-  document.getElementById('game').style.display = 'block';
-  document.getElementById('myNameD').textContent = myNick;
-  document.getElementById('roomCodeSmall').textContent = '房間：' + myRoom;
-  setupCanvas(); buildLevel(1);
-  if (!frameId) loop();
-}
-
-function copyLink() {
-  navigator.clipboard?.writeText(inviteLink)
-    .then(() => toast('📋 連結已複製！'))
-    .catch(() => { prompt('複製這個連結：', inviteLink); });
-}
-function shareLink() {
-  if (navigator.share) navigator.share({ title: '金剛爬塔邀請', text: '來和我玩！邀請碼：' + myRoom, url: inviteLink }).catch(() => copyLink());
-  else copyLink();
-}
-function backLobby() {
-  if (frameId) { cancelAnimationFrame(frameId); frameId = null; }
-  soloMode = false;
-  // restore all panels
-  document.getElementById('oppPanel').style.display = '';
-  document.getElementById('vsMid').style.display = '';
-  document.getElementById('oppHbarRow').style.display = '';
-  document.getElementById('oppChatSection').style.display = '';
-  document.getElementById('lobby').style.display = 'block';
-  document.getElementById('game').style.display = 'none';
-}
-
-// ══ GAME ENGINE ══
+// ═══════════════════════════════════════
+//  GAME VARS
+// ═══════════════════════════════════════
 const cv = document.getElementById('gc');
 const ctx = cv.getContext('2d');
-const GRAVITY = 0.48, BSPD = 2.4;
+const GRAV = 0.48, BSPD = 2.4;
 let platforms=[], ladders=[], barrels=[], flames=[];
-let pl={x:0,y:0,vx:0,vy:0,w:28,h:34,onGround:false,dir:1,animFrame:0};
-let kong={x:0,y:0,w:46,h:46,throwTimer:0};
+let pl={x:0,y:0,vx:0,vy:0,w:28,h:34,onGround:false,dir:1};
+let kong={x:0,y:0,w:46,h:46,timer:0};
 let princess={x:0,y:0};
-let level=1, score=0, lives=3, gState='idle', frames=0, scoreTimer=0;
+let score=0, lives=3, level=1, totalScore=0;
+let gState='idle'; // idle | playing | dead | win | gameover
+let frames=0, scoreTimer=0;
 const keys={left:false,right:false,jump:false,up:false};
 const jp={v:false};
-
-function cellW(){return Math.floor(cv.width/12);}
-function cellH(){return Math.round(cellW()*1.1);}
-
-function setupCanvas(){
-  cv.width=Math.min(window.innerWidth-18,540);
-  cv.height=Math.round(cv.width*1.28);
-}
-
-function buildLevel(lvl){
-  const W=cv.width,H=cv.height,CW=cellW(),CH=cellH();
-  platforms=[];ladders=[];barrels=[];flames=[];
-  pl.vx=0;pl.vy=0;pl.onGround=false;
-  [{y:H-CH,x:0,w:W},{y:H-CH*4,x:0,w:W*.85},{y:H-CH*7,x:W*.15,w:W*.85},{y:H-CH*10,x:0,w:W*.85},{y:H-CH*13,x:W*.1,w:W*.9}]
-    .forEach((p,i)=>platforms.push({...p,h:7,dark:i%2===0}));
-  ladders.push({x:W*.12,y:H-CH*4,h:CH*3},{x:W*.78,y:H-CH*7,h:CH*3},{x:W*.22,y:H-CH*10,h:CH*3},{x:W*.72,y:H-CH*13,h:CH*3});
-  kong.x=W*.1+6;kong.y=H-CH*13; // platform surface y
-  princess.x=W*.78;princess.y=H-CH*13; // platform surface y
-  pl.x=14;pl.y=H-CH-pl.h;
-  if(lvl>=2){flames.push({x:W*.35,y:H-CH-18,vx:1.5+lvl*.25,f:0},{x:W*.65,y:H-CH-18,vx:-(1.7+lvl*.25),f:0});}
-  // Start throw timer at 80% so first barrel comes quickly
-  kong.throwTimer=Math.round(Math.max(55,110-lvl*18)*0.8);
-}
-
+let soloMode=false, curDiff='normal', curSoloLv=1;
 let frameId=null;
+
+function CW(){ return cv.width; }
+function CH(){ return cv.height; }
+function cellW(){ return Math.floor(CW()/12); }
+function cellH(){ return Math.round(cellW()*1.1); }
+
+// ═══════════════════════════════════════
+//  BUILD LEVEL
+// ═══════════════════════════════════════
+function buildLevel(lv) {
+  const W=CW(), H=CH(), CW_=cellW(), CH_=cellH();
+  platforms=[]; ladders=[]; barrels=[]; flames=[];
+  pl.vx=0; pl.vy=0; pl.onGround=false;
+
+  const layouts = [
+    [{y:H-CH_,x:0,w:W},{y:H-CH_*4,x:0,w:W*.85},{y:H-CH_*7,x:W*.15,w:W*.85},{y:H-CH_*10,x:0,w:W*.85},{y:H-CH_*13,x:W*.1,w:W*.9}],
+    [{y:H-CH_,x:0,w:W},{y:H-CH_*3.5,x:W*.1,w:W*.9},{y:H-CH_*6.5,x:0,w:W*.85},{y:H-CH_*9.5,x:W*.15,w:W*.85},{y:H-CH_*13,x:W*.05,w:W*.95}],
+    [{y:H-CH_,x:0,w:W},{y:H-CH_*4,x:0,w:W*.65},{y:H-CH_*4,x:W*.72,w:W*.28},{y:H-CH_*7.5,x:W*.1,w:W*.8},{y:H-CH_*11,x:0,w:W*.9},{y:H-CH_*13,x:W*.05,w:W*.95}],
+    [{y:H-CH_,x:0,w:W},{y:H-CH_*3.5,x:0,w:W*.5},{y:H-CH_*6,x:W*.35,w:W*.65},{y:H-CH_*8.5,x:0,w:W*.6},{y:H-CH_*11,x:W*.3,w:W*.7},{y:H-CH_*13,x:W*.05,w:W*.95}],
+    [{y:H-CH_,x:0,w:W},{y:H-CH_*3,x:W*.05,w:W*.45},{y:H-CH_*3,x:W*.55,w:W*.45},{y:H-CH_*6,x:0,w:W*.55},{y:H-CH_*6,x:W*.6,w:W*.4},{y:H-CH_*9,x:W*.1,w:W*.8},{y:H-CH_*12,x:0,w:W},{y:H-CH_*13,x:W*.05,w:W*.95}],
+  ];
+
+  const layout = layouts[Math.min(lv-1, layouts.length-1)];
+  layout.forEach((p,i) => platforms.push({...p, h:7, dark:i%2===0}));
+
+  // Fixed ladders per level
+  const ladderSets = [
+    [{x:W*.12,y:H-CH_*4,h:CH_*3},{x:W*.78,y:H-CH_*7,h:CH_*3},{x:W*.22,y:H-CH_*10,h:CH_*3},{x:W*.72,y:H-CH_*13,h:CH_*3}],
+    [{x:W*.15,y:H-CH_*3.5,h:CH_*2.5},{x:W*.75,y:H-CH_*6.5,h:CH_*3},{x:W*.2,y:H-CH_*9.5,h:CH_*3},{x:W*.7,y:H-CH_*13,h:CH_*3}],
+    [{x:W*.55,y:H-CH_*4,h:CH_*3.5},{x:W*.12,y:H-CH_*7.5,h:CH_*3.5},{x:W*.75,y:H-CH_*11,h:CH_*3.5},{x:W*.4,y:H-CH_*13,h:CH_*2}],
+    [{x:W*.45,y:H-CH_*3.5,h:CH_*2.5},{x:W*.12,y:H-CH_*6,h:CH_*2.5},{x:W*.62,y:H-CH_*8.5,h:CH_*2.5},{x:W*.35,y:H-CH_*11,h:CH_*2.5},{x:W*.7,y:H-CH_*13,h:CH_*2}],
+    [{x:W*.4,y:H-CH_*3,h:CH_*2},{x:W*.15,y:H-CH_*6,h:CH_*3},{x:W*.7,y:H-CH_*6,h:CH_*3},{x:W*.45,y:H-CH_*9,h:CH_*3},{x:W*.2,y:H-CH_*12,h:CH_}],
+  ];
+  ladders = ladderSets[Math.min(lv-1, ladderSets.length-1)];
+
+  const topP = platforms[platforms.length-1];
+  kong.x = topP.x + 10; kong.y = topP.y;
+  princess.x = topP.x + topP.w - 50; princess.y = topP.y;
+  pl.x = 14; pl.y = H - CH_ - pl.h;
+
+  const lcfg = LEVELS[Math.min(lv-1, LEVELS.length-1)];
+  const dcfg = DIFF[curDiff];
+  const baseInterval = Math.max(45, 110 - lv*10);
+  kong.timer = Math.round(baseInterval * dcfg.interval * 0.8);
+
+  if(lcfg.flameCnt>0) flames.push({x:W*.3,y:H-CH_-18,vx:1.5*lcfg.barrelBoost,f:0});
+  if(lcfg.flameCnt>1) flames.push({x:W*.65,y:H-CH_-18,vx:-1.7*lcfg.barrelBoost,f:0});
+  if(lcfg.flameCnt>2 && platforms[2]) flames.push({x:W*.5,y:platforms[2].y-18,vx:1.3*lcfg.barrelBoost,f:0});
+
+  document.getElementById('hudLevel').textContent = lv;
+  document.getElementById('hudLevelLabel').textContent = `/${MAX_LVL}關`;
+}
+
+// ═══════════════════════════════════════
+//  GAME LOOP
+// ═══════════════════════════════════════
 function loop(){
-  frameId=requestAnimationFrame(loop);
+  frameId = requestAnimationFrame(loop);
   frames++;
   if(gState==='playing') tick();
   draw();
-  // broadcast position every 3 frames (not in solo)
-  if(!soloMode && frames%3===0 && socket && gState==='playing'){
+  if(!soloMode && frames%4===0 && socket && gState==='playing'){
     const topY=platforms[platforms.length-1]?.y||0;
-    const ht=Math.max(0,Math.min(100,Math.round(100*(1-(pl.y-topY)/(cv.height-topY)))));
-    socket.emit('pos',{x:Math.round(pl.x),y:Math.round(pl.y),dir:pl.dir,score,lives,level,h:ht,state:gState,nick:myNick,cw:cv.width,ch:cv.height});
+    const ht=Math.max(0,Math.min(100,Math.round(100*(1-(pl.y-topY)/(CH()-topY)))));
+    socket.emit('pos',{x:pl.x,y:pl.y,dir:pl.dir,score,lives,level,h:ht,state:gState,nick:myNick,cw:CW(),ch:CH()});
   }
-  if(frames%60===0) updateMyHUD();
 }
 
 function tick(){
-  pl.vx=0;
-  if(keys.left){pl.vx=-3.5;pl.dir=-1;}
-  if(keys.right){pl.vx=3.5;pl.dir=1;}
-  pl.vy+=GRAVITY;
-  for(const l of ladders) if(pl.x+pl.w*.5>l.x-9&&pl.x+pl.w*.5<l.x+20&&pl.y+pl.h>l.y&&pl.y<l.y+l.h&&keys.up){pl.vy=-2.8;if(frames%14===0)playSound('climb');}
-  if((keys.jump||keys.up)&&(pl.onGround||pl.vy===0)&&!jp.v){pl.vy=-11;pl.onGround=false;jp.v=true;playSound('jump');}
-  if(!keys.jump&&!keys.up) jp.v=false;
-  pl.x+=pl.vx;pl.y+=pl.vy;
-  pl.x=Math.max(0,Math.min(cv.width-pl.w,pl.x));
-  pl.onGround=false;
+  const W=CW(), H=CH();
+  // 1. 水平移動
+  pl.vx = 0;
+  if(keys.left){ pl.vx=-3.5; pl.dir=-1; }
+  if(keys.right){ pl.vx=3.5; pl.dir=1; }
+
+  // 2. 爬梯
+  let onLadder = false;
+  for(const l of ladders){
+    if(pl.x+pl.w*.5 > l.x-9 && pl.x+pl.w*.5 < l.x+20 &&
+       pl.y+pl.h > l.y && pl.y < l.y+l.h && keys.up){
+      pl.vy = -2.8;
+      onLadder = true;
+      if(frames%14===0) snd('climb');
+    }
+  }
+
+  // 3. 重力
+  if(!onLadder){
+    pl.vy += GRAV;
+    if(pl.vy > 16) pl.vy = 16;
+  }
+
+  // 4. 套用速度
+  pl.x += pl.vx;
+  pl.y += pl.vy;
+  pl.x = Math.max(0, Math.min(W-pl.w, pl.x));
+
+  // 5. 平台碰撞 — 先算碰撞，才知道是否 onGround
+  pl.onGround = false;
   for(const p of platforms){
-    if(pl.x+pl.w>p.x+4&&pl.x<p.x+p.w-4){
-      const feet=pl.y+pl.h;
-      if(feet>=p.y&&feet<=p.y+Math.max(12,Math.abs(pl.vy)+6)&&pl.vy>=0){
-        pl.y=p.y-pl.h;pl.vy=0;pl.onGround=true;
+    if(pl.x+pl.w > p.x+2 && pl.x < p.x+p.w-2){
+      const feet = pl.y + pl.h;
+      if(feet >= p.y && feet <= p.y + 18 && pl.vy >= 0){
+        pl.y = p.y - pl.h;
+        pl.vy = 0;
+        pl.onGround = true;
       }
     }
   }
-  if(frames%8===0) pl.animFrame=(pl.animFrame+1)%4;
-  kong.throwTimer++;
-  if(kong.throwTimer>=Math.max(55,110-level*18)){kong.throwTimer=0;barrels.push({x:kong.x+kong.w,y:kong.y+kong.h*.6,w:19,h:19,vx:BSPD+level*.35,vy:0,f:0});}
-  for(let i=barrels.length-1;i>=0;i--){const b=barrels[i];b.vy+=GRAVITY*.7;b.x+=b.vx;b.y+=b.vy;for(const p of platforms)if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;if(b.vy>2)playSound('barrel_land');b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}if(b.x<-30||b.x>cv.width+50||b.y>cv.height+80)barrels.splice(i,1);if(frames%4===0){b.f=(b.f+1)%4;if(frames%16===0)playSound('barrel_roll');}}
-  for(const f of flames){f.x+=f.vx;if(f.x<0||f.x>cv.width-18)f.vx*=-1;if(frames%6===0)f.f=(f.f+1)%4;}
+
+  // 6. 跳躍 — 碰撞後才判斷 onGround，這幀就能跳
+  const jumpPressed = keys.jump || keys.up;
+  if(jumpPressed && pl.onGround && !jp.v){
+    pl.vy = -12;
+    pl.onGround = false;
+    jp.v = true;
+    snd('jump');
+  }
+  if(!jumpPressed) jp.v = false;
+
+  // Barrels
+  const dcfg=DIFF[curDiff];
+  const lcfg=LEVELS[Math.min(level-1,LEVELS.length-1)];
+  kong.timer++;
+  const intv=Math.max(45,Math.round((110-level*10)*dcfg.interval));
+  if(kong.timer>=intv){
+    kong.timer=0;
+    barrels.push({x:kong.x+kong.w,y:kong.y+kong.h*.5,w:19,h:19,vx:BSPD*dcfg.barrelMul*lcfg.barrelBoost,vy:0,f:0});
+    snd('barrel');
+  }
+  for(let i=barrels.length-1;i>=0;i--){
+    const b=barrels[i];
+    b.vy+=GRAV*.7;b.x+=b.vx;b.y+=b.vy;
+    for(const p of platforms) if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}
+    if(b.x<-30||b.x>W+50||b.y>H+80) barrels.splice(i,1);
+    if(frames%4===0) b.f=(b.f+1)%4;
+  }
+  for(const f of flames){f.x+=f.vx;if(f.x<0||f.x>W-18)f.vx*=-1;if(frames%6===0)f.f=(f.f+1)%4;}
+
+  // Hits
   for(const b of barrels) if(Math.abs(pl.x+14-(b.x+9))<19&&Math.abs(pl.y+17-(b.y+9))<19){onHit();return;}
   for(const f of flames) if(Math.abs(pl.x+14-f.x)<20&&Math.abs(pl.y+17-f.y)<20){onHit();return;}
-  if(pl.y>cv.height+40){onHit();return;}
-  if(Math.abs(pl.x-princess.x)<38&&Math.abs(pl.y-princess.y)<46){onWin();return;}
+  if(pl.y>H+40){onHit();return;}
+  if(Math.abs(pl.x-princess.x)<40&&Math.abs(pl.y-princess.y)<48){onWin();return;}
+
+  // Score
   scoreTimer++;
-  if(scoreTimer%60===0){score+=10*level;updateMyHUD();}
+  if(scoreTimer%60===0){score+=10*level;updateHUD();}
   const topY=platforms[platforms.length-1]?.y||0;
-  const ht=Math.max(0,Math.min(1,1-(pl.y-topY)/(cv.height-topY)));
+  const ht=Math.max(0,Math.min(1,1-(pl.y-topY)/(H-topY)));
   if(scoreTimer%12===0&&ht>.08) score+=Math.floor(ht*4);
-  document.getElementById('myHbar').style.width=Math.round(ht*100)+'%';
+  document.getElementById('hbar').style.width=Math.round(ht*100)+'%';
+}
+
+// ═══════════════════════════════════════
+//  DRAW
+// ═══════════════════════════════════════
+function draw(){
+  const W=CW(),H=CH(),CW_=cellW(),CH_=cellH();
+  if(!W||!H) return;
+  ctx.clearRect(0,0,W,H);
+  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07071a');bg.addColorStop(1,'#101028');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,255,255,.25)';for(let i=0;i<22;i++)ctx.fillRect((i*83+11)%W,(i*57+7)%H,1,1);
+
+  for(const p of platforms){
+    const pg=ctx.createLinearGradient(p.x,p.y,p.x,p.y+p.h+6);pg.addColorStop(0,p.dark?'#4848a0':'#505098');pg.addColorStop(1,p.dark?'#2a2a60':'#303068');ctx.fillStyle=pg;ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(p.x,p.y,p.w,2);
+  }
+  for(const l of ladders){
+    ctx.fillStyle='rgba(170,110,50,.65)';ctx.fillRect(l.x,l.y,4,l.h);ctx.fillRect(l.x+13,l.y,4,l.h);
+    for(let ry=l.y+8;ry<l.y+l.h;ry+=13){ctx.fillStyle='rgba(210,150,70,.6)';ctx.fillRect(l.x,ry,17,3);}
+  }
+  for(const b of barrels){
+    ctx.save();ctx.translate(b.x+b.w/2,b.y+b.h/2);ctx.rotate(b.f*.38*(b.vx>0?1:-1));
+    const bg2=ctx.createRadialGradient(-2,-2,1,0,0,b.w*.5);bg2.addColorStop(0,'#c08040');bg2.addColorStop(1,'#804020');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#5a2810';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+  }
+  for(const f of flames){['#ff3010','#ff7000','#ffcc00'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();const s=(14-i*3)*(1+Math.sin(frames*.2+f.x)*.08);ctx.ellipse(f.x,f.y-i*4,s*.5,s*.9,0,0,Math.PI*2);ctx.fill();});}
+
+  // Princess & Kong
+  const platY=kong.y;
+  const charSize=Math.round(CW_*.85);
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.font=`${charSize}px sans-serif`;
+  const pM=ctx.measureText('👸');ctx.fillText('👸',princess.x+14,platY-(pM.actualBoundingBoxDescent||0));
+  const kM=ctx.measureText('🦍');ctx.fillText('🦍',kong.x+kong.w/2,platY-(kM.actualBoundingBoxDescent||0));
+
+  // Player
+  ctx.font=`${Math.round(CW_*.95)}px sans-serif`;
+  const em=pl.onGround?(pl.vx!==0?'🏃':'🧍'):'🤸';
+  ctx.save();if(pl.dir===-1){ctx.scale(-1,1);ctx.fillText(em,-(pl.x+pl.w/2),pl.y+pl.h);}else ctx.fillText(em,pl.x+pl.w/2,pl.y+pl.h);ctx.restore();
+
+  // Score overlay
+  ctx.fillStyle='rgba(255,255,255,.18)';ctx.font='bold 10px monospace';ctx.textAlign='left';ctx.fillText(`${score}分`,6,16);
+  // Key debug (顯示按鍵狀態，確認鍵盤有沒有作用)
+  ctx.fillStyle='rgba(255,255,100,.6)';ctx.font='bold 9px monospace';ctx.textAlign='right';
+  ctx.fillText(`←${keys.left?'●':'○'} →${keys.right?'●':'○'} ↑${keys.up?'●':'○'} 跳${keys.jump?'●':'○'} gnd${pl.onGround?'●':'○'}`,W-5,16);
+}
+
+// ═══════════════════════════════════════
+//  GAME EVENTS
+// ═══════════════════════════════════════
+function onHit(){
+  lives--;snd('hit');updateHUD();
+  if(lives<=0){
+    gState='gameover';setTimeout(()=>snd('death'),300);
+    showOv('💀','遊戲結束',`分數 ${score}`,
+      `<button class="btn btn-red" onclick="restartGame()">再來一局</button><button class="btn" onclick="goLobby()">回大廳</button>`);
+  } else {
+    showOv('💥','被擊中！',`剩 ${lives} 命`,
+      `<button class="btn btn-red" onclick="respawn()">繼續 ▶</button><button class="btn" onclick="restartGame()">重開</button>`);
+  }
+}
+
+function respawn(){
+  pl.x=14;pl.y=CH()-cellH()-pl.h;pl.vx=0;pl.vy=0;pl.onGround=false;
+  barrels=[];gState='playing';hideOv();focusGame();
+}
+
+function onWin(){
+  const lcfg=LEVELS[Math.min(level-1,LEVELS.length-1)];
+  score+=lcfg.bonus;totalScore=score;
+  gState='win';snd('win');updateHUD();
+  if(soloMode){
+    if(level>=MAX_LVL){
+      showOv('🏆','全關通關！',`難度：${DIFF[curDiff].label}　總分：${score}`,
+        `<button class="btn btn-red" onclick="startSolo()">再挑戰</button><button class="btn" onclick="goLobby()">回大廳</button>`);
+      toast('🏆 恭喜完成全部 5 關！');
+    } else {
+      showOv('🎉',`${lcfg.name}過關！`,`獎勵 +${lcfg.bonus}　累計 ${score} 分`,
+        `<button class="btn btn-green" onclick="nextSoloLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
+    }
+  } else {
+    showOv('🏆','過關！',`分數 ${score}`,
+      `<button class="btn btn-green" onclick="nextOnlineLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
+  }
+}
+
+function nextSoloLv(){
+  curSoloLv++;level=curSoloLv;
+  gState='playing';barrels=[];flames=[];scoreTimer=0;
+  buildLevel(level);hideOv();updateHUD();focusGame();
+  toast(`🎮 ${LEVELS[level-1].name}：${LEVELS[level-1].desc}`);
+}
+function nextOnlineLv(){
+  level=Math.min(level+1,3);gState='playing';barrels=[];
+  buildLevel(level);hideOv();updateHUD();focusGame();
+}
+
+// ═══════════════════════════════════════
+//  GAME START / RESTART
+// ═══════════════════════════════════════
+function beginGame(){
+  score=soloMode?totalScore:0;
+  lives=DIFF[curDiff].lives;
+  gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
+  buildLevel(soloMode?curSoloLv:1);
+  hideOv();updateHUD();
+  // 確保 canvas 有焦點，鍵盤才能作用
+  setTimeout(focusGame,50);
+}
+
+function restartGame(){
+  curSoloLv=1;totalScore=0;level=1;score=0;
+  lives=DIFF[curDiff].lives;
+  gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
+  buildLevel(1);hideOv();updateHUD();focusGame();
 }
 
 function focusGame(){ cv.focus(); }
 
-function beginGame(){
-  score=0;lives=3;level=1;gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
-  buildLevel(1);updateMyHUD();hideOv();
-  focusGame();
-  sysMsg(`🎮 ${myNick} 開始遊戲！`);
+// ═══════════════════════════════════════
+//  OVERLAY
+// ═══════════════════════════════════════
+function showOv(em,ttl,sub,btns){
+  document.getElementById('ovEm').textContent=em;
+  document.getElementById('ovTtl').textContent=ttl;
+  document.getElementById('ovSub').textContent=sub;
+  document.getElementById('ovBtns').innerHTML=btns||'';
+  document.getElementById('mainOv').classList.add('show');
 }
-function restartMe(){
-  score=0;lives=3;level=1;gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
-  buildLevel(1);updateMyHUD();hideOv();
-  focusGame();
-  sysMsg(`🔄 ${myNick} 重新開始`);
-}
+function hideOv(){ document.getElementById('mainOv').classList.remove('show'); }
 
-function onHit(){
-  lives--;
-  playSound('hit');
-  if(!soloMode) socket?.emit('game_event',{type:'dead',score,lives,level,nick:myNick});
-  if(lives<=0){
-    gState='gameover';
-    setTimeout(()=>playSound('death'),300);
-    if(!soloMode) socket?.emit('game_event',{type:'gameover',score,lives:0,level,nick:myNick});
-    setOv('💀','遊戲結束',`最終分數 ${score}`,`<button class="btn btn-red" onclick="restartMe()">再來一局</button>`);
-  } else {
-    setOv('💥','被擊中了！',`剩 ${lives} 命`,
-      `<button class="btn btn-red" onclick="respawn()">❤️ 繼續（剩${lives}命）</button>`+
-      `<button class="btn" onclick="restartMe()">重新開始</button>`);
-  }
-  updateMyHUD();
-}
-function respawn(){
-  pl.x=14;pl.y=cv.height-cellH()-pl.h;pl.vx=0;pl.vy=0;pl.onGround=false;
-  barrels=[];gState='playing';hideOv();
-}
-function onWin(){
-  score+=1000;gState='win';
-  playSound('win');
-  if(!soloMode){ socket?.emit('game_event',{type:'win',score,lives,level,nick:myNick}); socket?.emit('score_update',{score,lives,level,nick:myNick}); }
-  updateMyHUD();
-  setOv('🏆','過關！',`分數 ${score}　第 ${level} 關`,
-    `<button class="btn btn-green" onclick="nextLevel()">下一關 →</button><button class="btn" onclick="restartMe()">重新開始</button>`);
-  sysMsg(`🏆 ${myNick} 以 ${score} 分完成第 ${level} 關！`);
-}
-function nextLevel(){level=Math.min(level+1,3);score+=0;gState='playing';barrels=[];buildLevel(level);hideOv();updateMyHUD();sysMsg(`📦 第 ${level} 關開始！`);}
-
-function draw(){
-  const W=cv.width,H=cv.height,CW=cellW(),CH=cellH();
-  ctx.clearRect(0,0,W,H);
-  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07071a');bg.addColorStop(1,'#101028');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='rgba(255,255,255,.3)';for(let i=0;i<22;i++)ctx.fillRect((i*83+11)%W,(i*57+7)%H,1,1);
-  for(const p of platforms){const pg=ctx.createLinearGradient(p.x,p.y,p.x,p.y+p.h+6);pg.addColorStop(0,p.dark?'#4848a0':'#505098');pg.addColorStop(1,p.dark?'#2a2a60':'#303068');ctx.fillStyle=pg;ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(p.x,p.y,p.w,2);}
-  for(const l of ladders){ctx.fillStyle='rgba(170,110,50,.65)';ctx.fillRect(l.x,l.y,4,l.h);ctx.fillRect(l.x+13,l.y,4,l.h);for(let ry=l.y+8;ry<l.y+l.h;ry+=13){ctx.fillStyle='rgba(210,150,70,.6)';ctx.fillRect(l.x,ry,17,3);}}
-  for(const b of barrels){ctx.save();ctx.translate(b.x+b.w/2,b.y+b.h/2);ctx.rotate(b.f*.38*(b.vx>0?1:-1));const bg2=ctx.createRadialGradient(-2,-2,1,0,0,b.w*.5);bg2.addColorStop(0,'#c08040');bg2.addColorStop(1,'#804020');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#5a2810';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
-  for(const f of flames){['#ff3010','#ff7000','#ffcc00'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();const s=(14-i*3)*(1+Math.sin(frames*.2+f.x)*.08);ctx.ellipse(f.x,f.y-i*4,s*.5,s*.9,0,0,Math.PI*2);ctx.fill();});}
-  // 用 measureText 量出實際 emoji 高度，確保全身站在平台上
-  const platY = kong.y; // 平台表面 y
-
-  // 統一縮小尺寸，確保全身都看得到
-  const charSize = Math.round(CW * 0.85);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'alphabetic';
-
-  // 公主
-  ctx.font = `${charSize}px sans-serif`;
-  const pM = ctx.measureText('👸');
-  const pDescent = pM.actualBoundingBoxDescent || 0;
-  ctx.fillText('👸', princess.x + 14, platY - pDescent);
-
-  // 金剛
-  ctx.font = `${charSize}px sans-serif`;
-  const kM = ctx.measureText('🦍');
-  const kDescent = kM.actualBoundingBoxDescent || 0;
-  ctx.fillText('🦍', kong.x + kong.w / 2, platY - kDescent);
-  // my player
-  const em=pl.onGround?(pl.vx!==0?'🏃':'🧍'):'🤸';
-  ctx.font=`${Math.round(CW*.95)}px sans-serif`;
-  ctx.save();if(pl.dir===-1){ctx.scale(-1,1);ctx.fillText(em,-(pl.x+pl.w/2),pl.y+pl.h);}else ctx.fillText(em,pl.x+pl.w/2,pl.y+pl.h);ctx.restore();
-  // opp ghost
-  if(oppConnected&&oppData.x){
-    const sx=cv.width/(oppData.cw||cv.width),sy=cv.height/(oppData.ch||cv.height);
-    const ox=oppData.x*sx,oy=oppData.y*sy;
-    ctx.globalAlpha=.5;ctx.font=`${Math.round(CW*.9)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='bottom';
-    ctx.save();if(oppData.dir===-1){ctx.scale(-1,1);ctx.fillText('🎮',-ox-(28*sx/2),oy+(34*sy));}else ctx.fillText('🎮',ox+28*sx/2,oy+34*sy);ctx.restore();
-    ctx.globalAlpha=1;
-    // opp name tag
-    ctx.fillStyle='rgba(0,200,240,.7)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';
-    ctx.fillText(oppData.nick||'對手',ox+28*sx/2,oy-2);
-  }
-  ctx.fillStyle='rgba(255,255,255,.18)';ctx.font='bold 10px monospace';ctx.textAlign='left';ctx.fillText(`${myNick} ${score}`,5,14);
+// ═══════════════════════════════════════
+//  HUD
+// ═══════════════════════════════════════
+function updateHUD(){
+  document.getElementById('hudScore').textContent=score;
+  document.getElementById('hudLevel').textContent=level;
+  const maxL=DIFF[curDiff].lives;
+  document.getElementById('hudLives').textContent='❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(Math.max(0,maxL-lives));
 }
 
-// ══ HUD ══
-function updateMyHUD(){
-  document.getElementById('myScoreD').textContent=score;
-  const lh=lives>0?'❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(Math.max(0,3-lives)):'💀';
-  document.getElementById('myLivesD').textContent=lh;
-  document.getElementById('myStatusD').textContent=`第 ${level} 關`;
-  socket?.emit('score_update',{score,lives,level,nick:myNick});
+// ═══════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════
+function kd(k){
+  if(k==='left') keys.left=true;
+  if(k==='right') keys.right=true;
+  if(k==='up') keys.up=true;
+  if(k==='jump') keys.jump=true;
+  document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.add('pressed');
 }
-function updateOppHUD(){
-  document.getElementById('oppScoreD').textContent=oppData.score||0;
-  document.getElementById('oppStatusD').textContent=`第 ${oppData.level||1} 關`;
-  document.getElementById('oppHbar').style.width=(oppData.h||0)+'%';
-  const lh=(oppData.lives||0)>0?'❤️'.repeat(Math.max(0,oppData.lives||0)):'💀';
-  document.getElementById('oppLivesD').textContent=lh;
+function ku(k){
+  if(k==='left') keys.left=false;
+  if(k==='right') keys.right=false;
+  if(k==='up') keys.up=false;
+  if(k==='jump') keys.jump=false;
+  document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.remove('pressed');
 }
-function setOv(em,ttl,sub,btns){document.getElementById('ovEm').textContent=em;document.getElementById('ovTtl').textContent=ttl;document.getElementById('ovSub').textContent=sub;document.getElementById('ovBtns').innerHTML=btns||'';document.getElementById('mainOv').classList.add('show');}
-function hideOv(){document.getElementById('mainOv').classList.remove('show');}
+// 鍵盤 - 三層保險
+function handleKey(e, down){
+  if(document.activeElement.tagName==='INPUT') return;
+  const k=e.key;
+  if(k==='ArrowLeft'||k==='a'||k==='A'){if(down)e.preventDefault(); down?kd('left'):ku('left');}
+  if(k==='ArrowRight'||k==='d'||k==='D'){if(down)e.preventDefault(); down?kd('right'):ku('right');}
+  if(k==='ArrowUp'||k==='w'||k==='W'){if(down)e.preventDefault(); down?kd('up'):ku('up'); down?kd('jump'):ku('jump');}
+  if(k===' '||k==='z'||k==='Z'){if(down)e.preventDefault(); down?kd('jump'):ku('jump');}
+}
+document.addEventListener('keydown',e=>handleKey(e,true),true);
+document.addEventListener('keyup',e=>handleKey(e,false),true);
+window.addEventListener('keydown',e=>handleKey(e,true),true);
+window.addEventListener('keyup',e=>handleKey(e,false),true);
+cv.addEventListener('touchstart',e=>{},{passive:true});
+window.addEventListener('resize',()=>{if(document.getElementById('game').style.display!=='none'){cv.width=Math.min(window.innerWidth-18,540);cv.height=Math.round(cv.width*1.28);buildLevel(level);}});
 
-// ══ KEYBOARD ══
-function kd(k){if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='up')keys.up=true;if(k==='jump')keys.jump=true;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.add('pressed');}
-function ku(k){if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='up')keys.up=false;if(k==='jump')keys.jump=false;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.remove('pressed');}
-window.addEventListener('keydown',e=>{
-  // 只在聊天輸入框時跳過
-  if(document.activeElement.id==='chatInp') return;
-  if(e.key==='ArrowLeft'||e.key==='a'){e.preventDefault();kd('left');}
-  if(e.key==='ArrowRight'||e.key==='d'){e.preventDefault();kd('right');}
-  if(e.key==='ArrowUp'||e.key==='w'){e.preventDefault();kd('up');}
-  if(e.key===' '||e.key==='z'||e.key==='ArrowUp'){e.preventDefault();kd('jump');}
-});
-window.addEventListener('keyup',e=>{
-  if(document.activeElement.id==='chatInp') return;
-  if(e.key==='ArrowLeft'||e.key==='a')ku('left');
-  if(e.key==='ArrowRight'||e.key==='d')ku('right');
-  if(e.key==='ArrowUp'||e.key==='w')ku('up');
-  if(e.key===' '||e.key==='z'||e.key==='ArrowUp')ku('jump');
-});
-window.addEventListener('resize',()=>{if(document.getElementById('game').style.display!=='none'){setupCanvas();buildLevel(level);}});
-
-// ══ CHAT ══
+// ═══════════════════════════════════════
+//  LOBBY
+// ═══════════════════════════════════════
+let myNick='玩家',myRoom='',inviteLink='',socket=null,oppConnected=false;
 const seenMsgs=new Set();
+
+function startSolo(){
+  myNick=document.getElementById('nickInp').value.trim()||'玩家';
+  localStorage.setItem('kongNick',myNick);
+  soloMode=true; curDiff=diff; curSoloLv=1; totalScore=0;
+  showGame();
+  const lcfg=LEVELS[0];
+  showOv('🦍',`${lcfg.name}`,`${lcfg.desc}　難度：${DIFF[curDiff].label}\n躲避滾桶，爬上頂端救出公主！`,
+    `<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
+}
+
+function createRoom(){
+  myNick=document.getElementById('nickInp').value.trim()||'玩家';
+  localStorage.setItem('kongNick',myNick);
+  soloMode=false;
+  myRoom=Math.random().toString(36).slice(2,8).toUpperCase();
+  const base=location.href.split('?')[0];
+  inviteLink=`${base}?room=${myRoom}`;
+  document.getElementById('inviteBox').style.display='block';
+  document.getElementById('roomCodeDisp').textContent=myRoom;
+  connectSocket();
+  setTimeout(()=>{socket.emit('join_room',{roomCode:myRoom,nick:myNick});},600);
+  showGame();
+  showOv('🦍','等待朋友加入','把邀請碼傳給朋友！',
+    `<button class="btn btn-red" onclick="beginGame()">▶ 我先開始</button>`);
+  document.getElementById('chatBox').style.display='block';
+}
+
+function joinRoom(){
+  myNick=document.getElementById('nickInp').value.trim()||'玩家';
+  localStorage.setItem('kongNick',myNick);
+  const code=document.getElementById('codeInp').value.trim().toUpperCase();
+  if(!code){toast('請輸入邀請碼！');return;}
+  soloMode=false; myRoom=code;
+  connectSocket();
+  setTimeout(()=>{socket.emit('join_room',{roomCode:myRoom,nick:myNick});},600);
+  showGame();
+  showOv('🦍','已加入房間！','等待對手準備好…',
+    `<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
+  document.getElementById('chatBox').style.display='block';
+}
+
+function showGame(){
+  document.getElementById('lobby').style.display='none';
+  document.getElementById('game').style.display='block';
+  // 設定 canvas 大小（game 已顯示，可正確計算）
+  cv.width=Math.min(window.innerWidth-18,540);
+  cv.height=Math.round(cv.width*1.28);
+  buildLevel(1);
+  updateHUD();
+  // 啟動 loop
+  if(frameId) cancelAnimationFrame(frameId);
+  frameId=null;
+  loop();
+}
+
+function goLobby(){
+  if(frameId){cancelAnimationFrame(frameId);frameId=null;}
+  gState='idle';soloMode=false;
+  document.getElementById('chatBox').style.display='none';
+  document.getElementById('inviteBox').style.display='none';
+  document.getElementById('lobby').style.display='block';
+  document.getElementById('game').style.display='none';
+  hideOv();
+}
+
+function copyLink(){navigator.clipboard?.writeText(inviteLink).then(()=>toast('📋 連結已複製！')).catch(()=>prompt('複製：',inviteLink));}
+function shareLink(){if(navigator.share)navigator.share({title:'金剛爬塔邀請',text:'來對戰！邀請碼：'+myRoom,url:inviteLink}).catch(()=>copyLink());else copyLink();}
+
+// ═══════════════════════════════════════
+//  SOCKET
+// ═══════════════════════════════════════
+function connectSocket(){
+  if(socket&&socket.connected) return;
+  socket=io(SERVER_URL,{transports:['websocket','polling']});
+  socket.on('connect',()=>{document.getElementById('cDot').classList.add('on');document.getElementById('cOnTxt').textContent='已連線';});
+  socket.on('disconnect',()=>{document.getElementById('cDot').classList.remove('on');});
+  socket.on('room_update',data=>{
+    const others=data.players.filter(p=>p.id!==socket.id);
+    if(others.length>0&&!oppConnected){
+      oppConnected=true;toast(`👥 ${others[0].nick} 加入了！`);
+      sysMsg(`🎮 ${others[0].nick} 加入房間！`);
+    }
+  });
+  socket.on('chat_msg',data=>renderMsg(data));
+  socket.on('chat_history',msgs=>msgs.forEach(m=>renderMsg(m)));
+}
+
+// ═══════════════════════════════════════
+//  CHAT
+// ═══════════════════════════════════════
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function fmtT(ts){return new Date(ts).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});}
 function renderMsg(data){
-  const id=data.id||data.ts;
+  const id=data.id||(data.ts+'_'+data.nick);
   if(seenMsgs.has(id))return;seenMsgs.add(id);
   const isMe=data.nick===myNick,isSys=data.type==='system';
   const el=document.getElementById('chatMsgs');
@@ -848,36 +773,35 @@ function renderMsg(data){
   else{
     w.className='cm '+(isMe?'me':'op');
     const color=isMe?'var(--red)':'var(--teal)';
-    const ava=isMe?'😊':'🎮';
-    w.innerHTML=`<div class="cm-meta"><div class="cm-ava" style="background:${color}22;">${ava}</div><span class="cm-name" style="color:${color}">${esc(data.nick||'')}</span><span class="cm-time">${fmtT(data.ts)}</span></div><div class="cm-b">${esc(data.text||'')}</div>`;
+    w.innerHTML=`<div class="cm-meta"><div class="cm-ava" style="background:${color}22;">${isMe?'😊':'🎮'}</div><span class="cm-name" style="color:${color}">${esc(data.nick||'')}</span><span class="cm-time">${fmtT(data.ts)}</span></div><div class="cm-b">${esc(data.text||'')}</div>`;
   }
   el.appendChild(w);el.scrollTop=el.scrollHeight;
 }
-function sysMsg(text){renderMsg({type:'system',text,ts:Date.now()});}
+function sysMsg(text){renderMsg({type:'system',text,ts:Date.now(),nick:'系統'});}
 function sendChat(text){
   const inp=document.getElementById('chatInp');
   const val=(text||inp.value).trim();if(!val)return;
   if(!text)inp.value='';
-  socket?.emit('chat_msg',{nick:myNick,text:val,ts:Date.now(),type:'chat'});
+  const msg={nick:myNick,text:val,ts:Date.now(),type:'chat',id:'m'+Date.now()};
+  renderMsg(msg);socket?.emit('chat_msg',msg);
 }
 function qr(t){sendChat(t);}
 document.getElementById('chatInp').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
 
-// ══ TOAST ══
+// ═══════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════
 let tTmr=null;
-function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');if(tTmr)clearTimeout(tTmr);tTmr=setTimeout(()=>el.classList.remove('show'),3200);}
+function toast(msg){const el=document.getElementById('toastEl');el.textContent=msg;el.classList.add('show');if(tTmr)clearTimeout(tTmr);tTmr=setTimeout(()=>el.classList.remove('show'),3200);}
 
-// ══ BOOT ══
-setupCanvas(); buildLevel(1);
+// ═══════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════
 const sn=localStorage.getItem('kongNick');
 if(sn) document.getElementById('nickInp').value=sn;
-// Auto-join from URL
-const params=new URLSearchParams(location.search);
-if(params.get('room')){
-  document.getElementById('codeInp').value=params.get('room');
-}
-// Start render loop even before game
-loop();
+const urlParams=new URLSearchParams(location.search);
+if(urlParams.get('room')) document.getElementById('codeInp').value=urlParams.get('room');
+setDiff('normal');
 </script>
 </body>
 </html>
