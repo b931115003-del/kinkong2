@@ -141,7 +141,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
   <div class="card">
     <div style="font-size:40px;text-align:center;margin-bottom:5px;">🦍</div>
     <div class="ltitle">金剛爬塔</div>
-    <div class="lsub">線上對戰版 · 邀請朋友一起玩！</div>
+    <div class="lsub">躲避滾桶 · 爬上頂端救出公主！</div>
 
     <div class="field">
       <label>暱稱</label>
@@ -149,6 +149,14 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     </div>
 
     <div class="lobby-btns">
+      <!-- 單人模式 -->
+      <button class="lbtn" onclick="startSolo()"
+        style="color:#fff;background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);">
+        🎮 單人練習
+      </button>
+
+      <div class="sep"><div class="sep-line"></div><div class="sep-txt">線上對戰</div><div class="sep-line"></div></div>
+
       <!-- 建立房間 -->
       <button class="lbtn" onclick="createRoom()"
         style="color:#fff;background:linear-gradient(135deg,#e94560,#8e1830);box-shadow:0 4px 20px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);">
@@ -161,8 +169,8 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
       <div style="display:flex;flex-direction:column;gap:8px;">
         <input class="code-inp" id="codeInp" placeholder="輸入邀請碼" maxlength="8">
         <button class="lbtn" onclick="joinRoom()"
-          style="color:#fff;background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);">
-          🎮 加入朋友的房間
+          style="color:#fff;background:linear-gradient(135deg,#06b060,#047a40);box-shadow:0 4px 20px rgba(6,160,80,.35),inset 0 1px 0 rgba(255,255,255,.12);">
+          ✅ 加入朋友的房間
         </button>
       </div>
     </div>
@@ -191,6 +199,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
   <header>
     <div class="logo">金剛爬塔 🦍</div>
     <div style="display:flex;gap:5px;">
+      <button class="btn" id="soundBtn" style="font-size:14px;padding:5px 10px;" onclick="toggleSound()" title="關閉音效">🔊</button>
       <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="restartMe()">⟳ 重開</button>
       <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="backLobby()">← 大廳</button>
     </div>
@@ -207,11 +216,11 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
       <div class="pc-lives" id="myLivesD">❤️❤️❤️</div>
       <div class="pc-status" id="myStatusD">第 1 關</div>
     </div>
-    <div class="vs-mid">
+    <div class="vs-mid" id="vsMid">
       <div class="vs-txt">VS</div>
       <div style="font-size:9px;color:#1e1e48;" id="roomCodeSmall"></div>
     </div>
-    <div class="pc pc-opp">
+    <div class="pc pc-opp" id="oppPanel">
       <div class="pc-name" style="color:var(--teal);justify-content:flex-end;">
         🎮 <span id="oppNameD">等待中…</span>
         <span class="live-dot" id="oppOnlineDot" style="background:#3a3a68;"></span>
@@ -229,7 +238,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
       <div class="hb-bg"><div class="hb hb-me" id="myHbar" style="width:0%"></div></div>
     </div>
     <div style="font-size:9px;color:#1e1e48;padding:0 4px;">↕</div>
-    <div class="hb-wrap" style="flex-direction:row-reverse;">
+    <div class="hb-wrap" style="flex-direction:row-reverse;" id="oppHbarRow">
       <div class="hb-label" style="color:var(--teal);">高度</div>
       <div class="hb-bg"><div class="hb hb-opp" id="oppHbar" style="width:0%"></div></div>
     </div>
@@ -262,7 +271,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
   <div class="hint">← → 移動 · ↑ / 空白 跳躍</div>
 
   <!-- Chat -->
-  <div class="chat">
+  <div class="chat" id="oppChatSection">
     <div class="chat-hdr">
       <div style="display:flex;align-items:center;gap:7px;">
         <div class="cdot" id="cDot"></div>
@@ -293,6 +302,173 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 <div class="toast" id="toast"></div>
 
 <script>
+// ══════════════════════════════════════════════════
+//  🔊 音效引擎（Web Audio API，不需要音效檔）
+// ══════════════════════════════════════════════════
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playSound(type) {
+  if (!soundEnabled) return;
+  try {
+    const ac = getAudio();
+    const now = ac.currentTime;
+
+    switch(type) {
+
+      case 'jump': {
+        // 輕快上升音
+        const o = ac.createOscillator();
+        const g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.type = 'square';
+        o.frequency.setValueAtTime(220, now);
+        o.frequency.exponentialRampToValueAtTime(440, now + 0.12);
+        g.gain.setValueAtTime(0.18, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        o.start(now); o.stop(now + 0.18);
+        break;
+      }
+
+      case 'barrel_roll': {
+        // 滾動低沉聲
+        const o = ac.createOscillator();
+        const g = ac.createGain();
+        const dist = ac.createWaveShaper();
+        const curve = new Float32Array(256);
+        for(let i=0;i<256;i++) curve[i]=((i/128)-1)*8;
+        dist.curve = curve;
+        o.connect(dist); dist.connect(g); g.connect(ac.destination);
+        o.type = 'sawtooth';
+        o.frequency.setValueAtTime(80 + Math.random()*20, now);
+        o.frequency.linearRampToValueAtTime(60, now + 0.15);
+        g.gain.setValueAtTime(0.08, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        o.start(now); o.stop(now + 0.15);
+        break;
+      }
+
+      case 'hit': {
+        // 被打中：爆炸噪音
+        const buf = ac.createBuffer(1, ac.sampleRate * 0.4, ac.sampleRate);
+        const data = buf.getChannelData(0);
+        for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * Math.pow(1-i/data.length, 1.5);
+        const src = ac.createBufferSource();
+        const g = ac.createGain();
+        const filt = ac.createBiquadFilter();
+        filt.type = 'lowpass'; filt.frequency.value = 400;
+        src.buffer = buf;
+        src.connect(filt); filt.connect(g); g.connect(ac.destination);
+        g.gain.setValueAtTime(0.6, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        src.start(now);
+        // 加一個下降音
+        const o2 = ac.createOscillator();
+        const g2 = ac.createGain();
+        o2.connect(g2); g2.connect(ac.destination);
+        o2.type = 'sawtooth';
+        o2.frequency.setValueAtTime(300, now);
+        o2.frequency.exponentialRampToValueAtTime(60, now + 0.3);
+        g2.gain.setValueAtTime(0.3, now);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        o2.start(now); o2.stop(now + 0.3);
+        break;
+      }
+
+      case 'death': {
+        // 死亡：悲傷下降音階
+        const notes = [392, 330, 277, 220, 185];
+        notes.forEach((freq, i) => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.connect(g); g.connect(ac.destination);
+          o.type = 'square';
+          const t = now + i * 0.12;
+          o.frequency.setValueAtTime(freq, t);
+          g.gain.setValueAtTime(0.15, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+          o.start(t); o.stop(t + 0.12);
+        });
+        break;
+      }
+
+      case 'win': {
+        // 過關：勝利音階
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.connect(g); g.connect(ac.destination);
+          o.type = 'square';
+          const t = now + i * 0.1;
+          o.frequency.setValueAtTime(freq, t);
+          g.gain.setValueAtTime(0.15, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+          o.start(t); o.stop(t + 0.14);
+        });
+        // 加一個長音收尾
+        setTimeout(() => {
+          try {
+            const ac2 = getAudio();
+            const o = ac2.createOscillator();
+            const g = ac2.createGain();
+            o.connect(g); g.connect(ac2.destination);
+            o.type = 'sine';
+            o.frequency.value = 1047;
+            g.gain.setValueAtTime(0.2, ac2.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.001, ac2.currentTime + 0.5);
+            o.start(); o.stop(ac2.currentTime + 0.5);
+          } catch(e) {}
+        }, 420);
+        break;
+      }
+
+      case 'climb': {
+        // 爬梯：短促高音點擊
+        const o = ac.createOscillator();
+        const g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.type = 'square';
+        o.frequency.value = 660;
+        g.gain.setValueAtTime(0.06, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        o.start(now); o.stop(now + 0.06);
+        break;
+      }
+
+      case 'barrel_land': {
+        // 桶子落地：撞擊聲
+        const buf = ac.createBuffer(1, ac.sampleRate * 0.1, ac.sampleRate);
+        const data = buf.getChannelData(0);
+        for(let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * (1-i/data.length);
+        const src = ac.createBufferSource();
+        const g = ac.createGain();
+        const filt = ac.createBiquadFilter();
+        filt.type = 'lowpass'; filt.frequency.value = 200;
+        src.buffer = buf;
+        src.connect(filt); filt.connect(g); g.connect(ac.destination);
+        g.gain.setValueAtTime(0.25, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        src.start(now);
+        break;
+      }
+
+    }
+  } catch(e) {}
+}
+
+// 音效開關按鈕狀態更新
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
+  document.getElementById('soundBtn').title = soundEnabled ? '關閉音效' : '開啟音效';
+}
+
 // ══════════════════════════════════════════════════
 //  ⚠️ 請把下面這行改成你的 Render 伺服器網址！
 //  部署後長這樣：https://你的名字-kong.onrender.com
@@ -381,7 +557,30 @@ function joinRoom() {
   connectAndJoin();
 }
 
+let soloMode = false;
+
+function startSolo() {
+  myNick = document.getElementById('nickInp').value.trim() || '玩家';
+  localStorage.setItem('kongNick', myNick);
+  soloMode = true;
+  enterGame();
+  // Hide opponent panel in solo mode
+  document.getElementById('oppPanel').style.display = 'none';
+  document.getElementById('vsMid').style.display = 'none';
+  document.getElementById('oppHbarRow').style.display = 'none';
+  document.getElementById('oppChatSection').style.display = 'none';
+  document.getElementById('roomCodeSmall').textContent = '單人模式';
+  setOv('🦍','準備好了！','按下方向鍵或螢幕按鈕開始移動！\n空白鍵或🦘按鈕跳躍',
+    `<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
+}
+
 function connectAndJoin() {
+  soloMode = false;
+  // Show opponent panel
+  document.getElementById('oppPanel').style.display = '';
+  document.getElementById('vsMid').style.display = '';
+  document.getElementById('oppHbarRow').style.display = '';
+  document.getElementById('oppChatSection').style.display = '';
   if (!socket || !socket.connected) connectSocket();
   setTimeout(() => {
     socket.emit('join_room', { roomCode: myRoom, nick: myNick });
@@ -409,6 +608,12 @@ function shareLink() {
 }
 function backLobby() {
   if (frameId) { cancelAnimationFrame(frameId); frameId = null; }
+  soloMode = false;
+  // restore all panels
+  document.getElementById('oppPanel').style.display = '';
+  document.getElementById('vsMid').style.display = '';
+  document.getElementById('oppHbarRow').style.display = '';
+  document.getElementById('oppChatSection').style.display = '';
   document.getElementById('lobby').style.display = 'block';
   document.getElementById('game').style.display = 'none';
 }
@@ -444,7 +649,8 @@ function buildLevel(lvl){
   princess.x=W*.78;princess.y=H-CH*13-30;
   pl.x=14;pl.y=H-CH-pl.h;
   if(lvl>=2){flames.push({x:W*.35,y:H-CH-18,vx:1.5+lvl*.25,f:0},{x:W*.65,y:H-CH-18,vx:-(1.7+lvl*.25),f:0});}
-  kong.throwTimer=0;
+  // Start throw timer at 80% so first barrel comes quickly
+  kong.throwTimer=Math.round(Math.max(55,110-lvl*18)*0.8);
 }
 
 let frameId=null;
@@ -453,8 +659,8 @@ function loop(){
   frames++;
   if(gState==='playing') tick();
   draw();
-  // broadcast position every 3 frames
-  if(frames%3===0 && socket && gState==='playing'){
+  // broadcast position every 3 frames (not in solo)
+  if(!soloMode && frames%3===0 && socket && gState==='playing'){
     const topY=platforms[platforms.length-1]?.y||0;
     const ht=Math.max(0,Math.min(100,Math.round(100*(1-(pl.y-topY)/(cv.height-topY)))));
     socket.emit('pos',{x:Math.round(pl.x),y:Math.round(pl.y),dir:pl.dir,score,lives,level,h:ht,state:gState,nick:myNick,cw:cv.width,ch:cv.height});
@@ -467,17 +673,24 @@ function tick(){
   if(keys.left){pl.vx=-3.5;pl.dir=-1;}
   if(keys.right){pl.vx=3.5;pl.dir=1;}
   pl.vy+=GRAVITY;
-  for(const l of ladders) if(pl.x+pl.w*.5>l.x-9&&pl.x+pl.w*.5<l.x+20&&pl.y+pl.h>l.y&&pl.y<l.y+l.h&&keys.up) pl.vy=-2.8;
-  if((keys.jump||keys.up)&&pl.onGround&&!jp.v){pl.vy=-11;pl.onGround=false;jp.v=true;}
+  for(const l of ladders) if(pl.x+pl.w*.5>l.x-9&&pl.x+pl.w*.5<l.x+20&&pl.y+pl.h>l.y&&pl.y<l.y+l.h&&keys.up){pl.vy=-2.8;if(frames%14===0)playSound('climb');}
+  if((keys.jump||keys.up)&&(pl.onGround||pl.vy===0)&&!jp.v){pl.vy=-11;pl.onGround=false;jp.v=true;playSound('jump');}
   if(!keys.jump&&!keys.up) jp.v=false;
   pl.x+=pl.vx;pl.y+=pl.vy;
   pl.x=Math.max(0,Math.min(cv.width-pl.w,pl.x));
   pl.onGround=false;
-  for(const p of platforms) if(pl.x+pl.w>p.x&&pl.x<p.x+p.w&&pl.y+pl.h>=p.y&&pl.y+pl.h<=p.y+pl.vy+10&&pl.vy>=0){pl.y=p.y-pl.h;pl.vy=0;pl.onGround=true;}
+  for(const p of platforms){
+    if(pl.x+pl.w>p.x+4&&pl.x<p.x+p.w-4){
+      const feet=pl.y+pl.h;
+      if(feet>=p.y&&feet<=p.y+Math.max(12,Math.abs(pl.vy)+6)&&pl.vy>=0){
+        pl.y=p.y-pl.h;pl.vy=0;pl.onGround=true;
+      }
+    }
+  }
   if(frames%8===0) pl.animFrame=(pl.animFrame+1)%4;
   kong.throwTimer++;
   if(kong.throwTimer>=Math.max(55,110-level*18)){kong.throwTimer=0;barrels.push({x:kong.x+kong.w,y:kong.y+kong.h*.6,w:19,h:19,vx:BSPD+level*.35,vy:0,f:0});}
-  for(let i=barrels.length-1;i>=0;i--){const b=barrels[i];b.vy+=GRAVITY*.7;b.x+=b.vx;b.y+=b.vy;for(const p of platforms)if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}if(b.x<-30||b.x>cv.width+50||b.y>cv.height+80)barrels.splice(i,1);if(frames%4===0)b.f=(b.f+1)%4;}
+  for(let i=barrels.length-1;i>=0;i--){const b=barrels[i];b.vy+=GRAVITY*.7;b.x+=b.vx;b.y+=b.vy;for(const p of platforms)if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;if(b.vy>2)playSound('barrel_land');b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}if(b.x<-30||b.x>cv.width+50||b.y>cv.height+80)barrels.splice(i,1);if(frames%4===0){b.f=(b.f+1)%4;if(frames%16===0)playSound('barrel_roll');}}
   for(const f of flames){f.x+=f.vx;if(f.x<0||f.x>cv.width-18)f.vx*=-1;if(frames%6===0)f.f=(f.f+1)%4;}
   for(const b of barrels) if(Math.abs(pl.x+14-(b.x+9))<19&&Math.abs(pl.y+17-(b.y+9))<19){onHit();return;}
   for(const f of flames) if(Math.abs(pl.x+14-f.x)<20&&Math.abs(pl.y+17-f.y)<20){onHit();return;}
@@ -504,10 +717,12 @@ function restartMe(){
 
 function onHit(){
   lives--;
-  socket?.emit('game_event',{type:'dead',score,lives,level,nick:myNick});
+  playSound('hit');
+  if(!soloMode) socket?.emit('game_event',{type:'dead',score,lives,level,nick:myNick});
   if(lives<=0){
     gState='gameover';
-    socket?.emit('game_event',{type:'gameover',score,lives:0,level,nick:myNick});
+    setTimeout(()=>playSound('death'),300);
+    if(!soloMode) socket?.emit('game_event',{type:'gameover',score,lives:0,level,nick:myNick});
     setOv('💀','遊戲結束',`最終分數 ${score}`,`<button class="btn btn-red" onclick="restartMe()">再來一局</button>`);
   } else {
     setOv('💥','被擊中了！',`剩 ${lives} 命`,
@@ -522,8 +737,8 @@ function respawn(){
 }
 function onWin(){
   score+=1000;gState='win';
-  socket?.emit('game_event',{type:'win',score,lives,level,nick:myNick});
-  socket?.emit('score_update',{score,lives,level,nick:myNick});
+  playSound('win');
+  if(!soloMode){ socket?.emit('game_event',{type:'win',score,lives,level,nick:myNick}); socket?.emit('score_update',{score,lives,level,nick:myNick}); }
   updateMyHUD();
   setOv('🏆','過關！',`分數 ${score}　第 ${level} 關`,
     `<button class="btn btn-green" onclick="nextLevel()">下一關 →</button><button class="btn" onclick="restartMe()">重新開始</button>`);
