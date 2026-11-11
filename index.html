@@ -246,7 +246,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 
   <!-- Canvas -->
   <div class="canvas-wrap">
-    <canvas id="gc"></canvas>
+    <canvas id="gc" tabindex="0" style="outline:none;cursor:pointer;" onclick="focusGame()" title="點擊畫面後使用鍵盤操控"></canvas>
     <div class="ov show" id="mainOv">
       <div class="ov-em" id="ovEm">🦍</div>
       <div class="ov-ttl gold" id="ovTtl">等待開始</div>
@@ -268,7 +268,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     </div>
     <button class="jb" onpointerdown="kd('jump')" onpointerup="ku('jump')" onpointercancel="ku('jump')">🦘<br><span style="font-size:9px;">跳</span></button>
   </div>
-  <div class="hint">← → 移動 · ↑ / 空白 跳躍</div>
+  <div class="hint">先點擊遊戲畫面 → 再用 ← → 移動 · ↑ / 空白 跳躍</div>
 
   <!-- Chat -->
   <div class="chat" id="oppChatSection">
@@ -645,8 +645,8 @@ function buildLevel(lvl){
   [{y:H-CH,x:0,w:W},{y:H-CH*4,x:0,w:W*.85},{y:H-CH*7,x:W*.15,w:W*.85},{y:H-CH*10,x:0,w:W*.85},{y:H-CH*13,x:W*.1,w:W*.9}]
     .forEach((p,i)=>platforms.push({...p,h:7,dark:i%2===0}));
   ladders.push({x:W*.12,y:H-CH*4,h:CH*3},{x:W*.78,y:H-CH*7,h:CH*3},{x:W*.22,y:H-CH*10,h:CH*3},{x:W*.72,y:H-CH*13,h:CH*3});
-  kong.x=W*.1+6;kong.y=H-CH*13-kong.h+2;
-  princess.x=W*.78;princess.y=H-CH*13-30;
+  kong.x=W*.1+6;kong.y=H-CH*13; // platform surface y
+  princess.x=W*.78;princess.y=H-CH*13; // platform surface y
   pl.x=14;pl.y=H-CH-pl.h;
   if(lvl>=2){flames.push({x:W*.35,y:H-CH-18,vx:1.5+lvl*.25,f:0},{x:W*.65,y:H-CH-18,vx:-(1.7+lvl*.25),f:0});}
   // Start throw timer at 80% so first barrel comes quickly
@@ -704,14 +704,18 @@ function tick(){
   document.getElementById('myHbar').style.width=Math.round(ht*100)+'%';
 }
 
+function focusGame(){ cv.focus(); }
+
 function beginGame(){
   score=0;lives=3;level=1;gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
   buildLevel(1);updateMyHUD();hideOv();
+  focusGame();
   sysMsg(`🎮 ${myNick} 開始遊戲！`);
 }
 function restartMe(){
   score=0;lives=3;level=1;gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
   buildLevel(1);updateMyHUD();hideOv();
+  focusGame();
   sysMsg(`🔄 ${myNick} 重新開始`);
 }
 
@@ -755,8 +759,25 @@ function draw(){
   for(const l of ladders){ctx.fillStyle='rgba(170,110,50,.65)';ctx.fillRect(l.x,l.y,4,l.h);ctx.fillRect(l.x+13,l.y,4,l.h);for(let ry=l.y+8;ry<l.y+l.h;ry+=13){ctx.fillStyle='rgba(210,150,70,.6)';ctx.fillRect(l.x,ry,17,3);}}
   for(const b of barrels){ctx.save();ctx.translate(b.x+b.w/2,b.y+b.h/2);ctx.rotate(b.f*.38*(b.vx>0?1:-1));const bg2=ctx.createRadialGradient(-2,-2,1,0,0,b.w*.5);bg2.addColorStop(0,'#c08040');bg2.addColorStop(1,'#804020');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#5a2810';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
   for(const f of flames){['#ff3010','#ff7000','#ffcc00'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();const s=(14-i*3)*(1+Math.sin(frames*.2+f.x)*.08);ctx.ellipse(f.x,f.y-i*4,s*.5,s*.9,0,0,Math.PI*2);ctx.fill();});}
-  ctx.font=`${Math.round(CW*1.1)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('👸',princess.x+14,princess.y+6);
-  ctx.font=`${Math.round(CW*1.5)}px sans-serif`;ctx.fillText('🦍',kong.x+kong.w/2,kong.y+kong.h);
+  // 用 measureText 量出實際 emoji 高度，確保全身站在平台上
+  const platY = kong.y; // 平台表面 y
+
+  // 統一縮小尺寸，確保全身都看得到
+  const charSize = Math.round(CW * 0.85);
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'alphabetic';
+
+  // 公主
+  ctx.font = `${charSize}px sans-serif`;
+  const pM = ctx.measureText('👸');
+  const pDescent = pM.actualBoundingBoxDescent || 0;
+  ctx.fillText('👸', princess.x + 14, platY - pDescent);
+
+  // 金剛
+  ctx.font = `${charSize}px sans-serif`;
+  const kM = ctx.measureText('🦍');
+  const kDescent = kM.actualBoundingBoxDescent || 0;
+  ctx.fillText('🦍', kong.x + kong.w / 2, platY - kDescent);
   // my player
   const em=pl.onGround?(pl.vx!==0?'🏃':'🧍'):'🤸';
   ctx.font=`${Math.round(CW*.95)}px sans-serif`;
@@ -796,8 +817,21 @@ function hideOv(){document.getElementById('mainOv').classList.remove('show');}
 // ══ KEYBOARD ══
 function kd(k){if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='up')keys.up=true;if(k==='jump')keys.jump=true;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.add('pressed');}
 function ku(k){if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='up')keys.up=false;if(k==='jump')keys.jump=false;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.remove('pressed');}
-document.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA'].includes(document.activeElement.tagName))return;if(e.key==='ArrowLeft'||e.key==='a')kd('left');if(e.key==='ArrowRight'||e.key==='d')kd('right');if(e.key==='ArrowUp'||e.key==='w')kd('up');if(e.key===' '||e.key==='z'){e.preventDefault();kd('jump');}});
-document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft'||e.key==='a')ku('left');if(e.key==='ArrowRight'||e.key==='d')ku('right');if(e.key==='ArrowUp'||e.key==='w')ku('up');if(e.key===' '||e.key==='z')ku('jump');});
+window.addEventListener('keydown',e=>{
+  // 只在聊天輸入框時跳過
+  if(document.activeElement.id==='chatInp') return;
+  if(e.key==='ArrowLeft'||e.key==='a'){e.preventDefault();kd('left');}
+  if(e.key==='ArrowRight'||e.key==='d'){e.preventDefault();kd('right');}
+  if(e.key==='ArrowUp'||e.key==='w'){e.preventDefault();kd('up');}
+  if(e.key===' '||e.key==='z'||e.key==='ArrowUp'){e.preventDefault();kd('jump');}
+});
+window.addEventListener('keyup',e=>{
+  if(document.activeElement.id==='chatInp') return;
+  if(e.key==='ArrowLeft'||e.key==='a')ku('left');
+  if(e.key==='ArrowRight'||e.key==='d')ku('right');
+  if(e.key==='ArrowUp'||e.key==='w')ku('up');
+  if(e.key===' '||e.key==='z'||e.key==='ArrowUp')ku('jump');
+});
 window.addEventListener('resize',()=>{if(document.getElementById('game').style.display!=='none'){setupCanvas();buildLevel(level);}});
 
 // ══ CHAT ══
