@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>金剛爬塔 — 單人 & 線上對戰</title>
+<title>金剛爬塔</title>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -21,55 +21,57 @@ body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 0%,#18
 #lobby{width:100%;max-width:440px;margin-top:16px;}
 .card{background:linear-gradient(145deg,#141430,#0a0a1e);border:1px solid #252560;border-radius:18px;padding:26px 22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.7);}
 .ltitle{font-size:26px;font-weight:900;color:var(--gold);text-align:center;letter-spacing:2px;text-shadow:0 0 24px rgba(245,166,35,.5);}
-.lsub{font-size:12.5px;color:var(--text2);text-align:center;margin:4px 0 18px;line-height:1.5;}
-.field{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.lsub{font-size:12px;color:var(--text2);text-align:center;margin:4px 0 18px;line-height:1.5;}
+.field{display:flex;align-items:center;gap:8px;margin-bottom:11px;}
 .field label{font-size:12px;color:var(--text2);flex-shrink:0;width:48px;}
 .field input{flex:1;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:14px;color:var(--text);font-family:inherit;outline:none;}
 .field input:focus{border-color:rgba(100,80,200,.5);}
-.sep{display:flex;align-items:center;gap:10px;margin:14px 0;}
+.sep{display:flex;align-items:center;gap:10px;margin:12px 0;}
 .sep-line{flex:1;height:1px;background:#1e1e40;}
 .sep-txt{font-size:11px;color:#2a2a60;letter-spacing:1px;}
-
-/* DIFFICULTY BUTTONS */
 .diff-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px;}
 .diff-btn{padding:9px 6px;border-radius:9px;cursor:pointer;border:1px solid #252550;background:#0e0e28;color:var(--text2);font-size:12px;font-weight:700;text-align:center;transition:all .17s;line-height:1.4;}
-.diff-btn.active{transform:scale(1.04);}
 .diff-btn span{display:block;font-size:10px;font-weight:400;margin-top:2px;opacity:.7;}
-
 .lbtn{width:100%;padding:13px;font-size:14px;font-weight:800;border-radius:12px;border:none;cursor:pointer;transition:all .17s;letter-spacing:.4px;margin-bottom:9px;color:#fff;}
 .lbtn:last-child{margin-bottom:0;}
 .lbtn:hover{transform:translateY(-2px);}
-.code-inp{width:100%;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:18px;font-weight:700;color:var(--gold);letter-spacing:5px;text-align:center;font-family:monospace;outline:none;margin-bottom:8px;}
+.code-inp{width:100%;background:#0a0a20;border:1px solid #252550;border-radius:8px;padding:9px 12px;font-size:20px;font-weight:700;color:var(--gold);letter-spacing:5px;text-align:center;font-family:monospace;outline:none;margin-bottom:8px;}
 .code-inp:focus{border-color:rgba(0,200,240,.5);}
-.invite-box{margin-top:12px;padding:12px 14px;background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);border-radius:10px;display:none;}
-.invite-code-big{font-size:30px;font-weight:900;color:var(--gold);letter-spacing:7px;text-align:center;padding:8px;background:#07071e;border-radius:8px;border:1px solid rgba(245,166,35,.2);font-family:monospace;margin:6px 0;}
-.waiting{display:flex;align-items:center;gap:8px;margin-top:9px;}
-.wdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;}
+.wdot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite;flex-shrink:0;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
 
 /* GAME */
 #game{display:none;width:100%;max-width:560px;}
 header{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 0 6px;gap:8px;flex-wrap:wrap;}
-.logo{font-size:18px;font-weight:900;letter-spacing:2px;color:var(--gold);text-shadow:0 0 16px rgba(245,166,35,.4);}
+.logo{font-size:18px;font-weight:900;letter-spacing:2px;color:var(--gold);}
 
 /* HUD */
-.hud-row{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px;flex-wrap:wrap;}
-.hud-block{text-align:center;padding:6px 12px;border-radius:9px;background:linear-gradient(160deg,#1c1c38,#0e0e22);border:1px solid #252550;box-shadow:0 2px 8px rgba(0,0,0,.35);}
-.hud-val{font-size:17px;font-weight:800;line-height:1;}
-.hud-label{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:.8px;text-transform:uppercase;}
-.hbar-wrap{flex:1;height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;}
-.hbar{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),#c02040);transition:width .2s;}
+.hud{width:100%;background:linear-gradient(145deg,#111130,#0a0a1e);border:1px solid #1e1e44;border-radius:12px;padding:10px 14px;margin-bottom:6px;}
+.hud-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.hb{text-align:center;min-width:48px;}
+.hb-val{font-size:17px;font-weight:800;line-height:1;}
+.hb-lbl{font-size:9px;color:var(--text2);margin-top:2px;letter-spacing:.8px;text-transform:uppercase;}
+.hud-div{width:1px;height:28px;background:#1e1e44;flex-shrink:0;}
+.hbar-wrap{flex:1;display:flex;flex-direction:column;gap:4px;}
+.hbar-bg{height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;}
+.hbar-fill{height:100%;border-radius:2px;transition:width .2s;}
+
+/* OPP INFO */
+.opp-row{display:none;width:100%;background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.2);border-radius:10px;padding:9px 14px;margin-bottom:5px;}
+.opp-row.show{display:block;}
+
+/* INVITE */
+.invite-row{display:none;width:100%;background:rgba(6,214,160,.05);border:1px solid rgba(6,214,160,.2);border-radius:10px;padding:10px 14px;margin-bottom:5px;}
+.invite-row.show{display:block;}
 
 /* CANVAS */
 .canvas-wrap{position:relative;width:100%;}
 #gc{display:block;border-radius:12px;image-rendering:pixelated;width:100%;outline:none;cursor:pointer;box-shadow:0 8px 40px rgba(0,0,0,.7),0 0 0 2px rgba(255,255,255,.04);}
-
-/* OVERLAY */
 .ov{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:12px;gap:9px;background:rgba(5,5,20,.9);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .3s;}
 .ov.show{opacity:1;pointer-events:all;}
 .ov-em{font-size:50px;line-height:1;}
 .ov-ttl{font-size:21px;font-weight:900;text-align:center;}
-.ov-ttl.gold{color:var(--gold);text-shadow:0 0 20px rgba(245,166,35,.4);}
+.ov-ttl.gold{color:var(--gold);}
 .ov-ttl.red{color:var(--red);}
 .ov-sub{font-size:12px;color:var(--text2);text-align:center;max-width:260px;line-height:1.6;}
 .ov-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px;}
@@ -78,22 +80,23 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 .ctrl-row{display:flex;align-items:center;justify-content:center;gap:14px;margin:7px 0 3px;}
 .dpw{padding:9px;border-radius:16px;background:linear-gradient(145deg,#111128,#0a0a1a);border:1px solid #1e1e40;box-shadow:0 5px 20px rgba(0,0,0,.55);}
 .dp{display:grid;grid-template-areas:". up ." "left . right";gap:4px;}
-.db{width:52px;height:52px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;color:#9090c8;background:linear-gradient(145deg,#232345,#141432);border:1px solid #2e2e60;box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.45);transition:all .1s;position:relative;overflow:hidden;border-radius:9px;}
+.db{width:52px;height:52px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;color:#9090c8;background:linear-gradient(145deg,#232345,#141432);border:1px solid #2e2e60;box-shadow:0 4px 12px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.07),inset 0 -2px 0 rgba(0,0,0,.45);transition:all .1s;position:relative;overflow:hidden;}
+.db::after{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(to bottom,rgba(255,255,255,.07),transparent);pointer-events:none;}
 .db.up{grid-area:up;border-radius:11px 11px 5px 5px;}
 .db.left{grid-area:left;border-radius:11px 5px 5px 11px;}
 .db.right{grid-area:right;border-radius:5px 11px 11px 5px;}
-.db::after{content:'';position:absolute;top:0;left:0;right:0;height:42%;background:linear-gradient(to bottom,rgba(255,255,255,.07),transparent);pointer-events:none;}
-.db:active,.db.pressed{color:var(--red);border-color:var(--red);background:linear-gradient(145deg,#180a10,#0e0608);box-shadow:0 1px 3px rgba(0,0,0,.5),0 0 12px rgba(233,69,96,.22),inset 0 2px 5px rgba(0,0,0,.5);transform:scale(.93);}
+.db:active,.db.pressed{color:var(--red);border-color:var(--red);background:linear-gradient(145deg,#180a10,#0e0608);box-shadow:0 1px 3px rgba(0,0,0,.5),inset 0 2px 5px rgba(0,0,0,.5);transform:scale(.93);}
 .jb{width:54px;height:54px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;touch-action:manipulation;background:linear-gradient(135deg,#e94560,#8e1830);border:none;color:#fff;box-shadow:0 4px 16px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.15);}
 .jb:active{transform:scale(.92);}
 .hint{font-size:10px;color:#2a2a56;text-align:center;margin-bottom:4px;}
 
 /* CHAT */
-.chat{background:linear-gradient(145deg,#0e0e28,#080818);border:1px solid #1a1a3a;border-radius:12px;overflow:hidden;margin-top:6px;}
-.chat-hdr{padding:7px 12px 5px;border-bottom:1px solid #161630;display:flex;align-items:center;justify-content:space-between;}
-.cdot{width:7px;height:7px;border-radius:50%;background:#3a3a68;}
+.chat{display:none;background:linear-gradient(145deg,#0e0e28,#080818);border:1px solid #1a1a3a;border-radius:12px;overflow:hidden;margin-top:6px;}
+.chat.show{display:block;}
+.chat-hdr{padding:7px 12px 5px;border-bottom:1px solid #161630;display:flex;align-items:center;gap:8px;}
+.cdot{width:7px;height:7px;border-radius:50%;background:#3a3a68;flex-shrink:0;}
 .cdot.on{background:var(--green);box-shadow:0 0 6px rgba(6,214,160,.5);animation:pulse 2s infinite;}
-.chat-msgs{height:120px;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:4px;}
+.chat-msgs{height:130px;overflow-y:auto;padding:6px 10px;display:flex;flex-direction:column;gap:4px;}
 .chat-msgs::-webkit-scrollbar{width:3px;}
 .chat-msgs::-webkit-scrollbar-thumb{background:#1e1e3a;border-radius:2px;}
 .cm{display:flex;flex-direction:column;gap:1px;animation:fu .2s;}
@@ -115,6 +118,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 .cinp{flex:1;background:#07071e;border:1px solid #202050;border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
 .cinp:focus{border-color:rgba(100,80,200,.5);}
 .csend{padding:7px 12px;border-radius:7px;background:linear-gradient(135deg,#4030a0,#2a1870);border:none;color:#c0b0f0;cursor:pointer;font-size:14px;}
+.csend:hover{background:linear-gradient(135deg,#5040c0,#3a2890);}
 
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(70px);opacity:0;background:linear-gradient(135deg,#141432,#0a0a1e);border:1px solid rgba(245,166,35,.3);border-radius:12px;padding:9px 16px;font-size:12.5px;color:var(--gold);max-width:320px;text-align:center;z-index:999;transition:all .35s;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
@@ -128,61 +132,26 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     <div style="font-size:38px;text-align:center;margin-bottom:4px;">🦍</div>
     <div class="ltitle">金剛爬塔</div>
     <div class="lsub">躲避滾桶 · 爬上頂端救出公主！</div>
+    <div class="field"><label>暱稱</label><input id="nickInp" placeholder="輸入你的暱稱…" maxlength="12" value="玩家"></div>
 
-    <div class="field">
-      <label>暱稱</label>
-      <input id="nickInp" placeholder="輸入你的暱稱…" maxlength="12" value="玩家">
-    </div>
-
-    <!-- 難度選擇（單人用） -->
     <div style="font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:8px;">🎯 單人難度</div>
     <div class="diff-row">
-      <button class="diff-btn" id="d-easy" onclick="setDiff('easy')" style="border-color:rgba(6,214,160,.4);color:#06d6a0;">
-        😊 簡單<span>5命・慢桶</span>
-      </button>
-      <button class="diff-btn active" id="d-normal" onclick="setDiff('normal')" style="border-color:var(--gold);background:rgba(245,166,35,.1);color:var(--gold);box-shadow:0 0 0 1px rgba(245,166,35,.2);">
-        🧑 普通<span>3命・標準</span>
-      </button>
-      <button class="diff-btn" id="d-hard" onclick="setDiff('hard')" style="border-color:rgba(233,69,96,.4);color:#ff8090;">
-        💀 困難<span>2命・快桶</span>
-      </button>
+      <button class="diff-btn" id="d-easy" onclick="setDiff('easy')" style="border-color:rgba(6,214,160,.4);color:#06d6a0;">😊 簡單<span>5命・慢桶</span></button>
+      <button class="diff-btn" id="d-normal" onclick="setDiff('normal')" style="border-color:var(--gold);background:rgba(245,166,35,.1);color:var(--gold);box-shadow:0 0 0 1px rgba(245,166,35,.2);">🧑 普通<span>3命・標準</span></button>
+      <button class="diff-btn" id="d-hard" onclick="setDiff('hard')" style="border-color:rgba(233,69,96,.4);color:#ff8090;">💀 困難<span>2命・快桶</span></button>
     </div>
 
-    <!-- 單人按鈕 -->
-    <button class="lbtn" onclick="startSolo()" style="background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);">
-      🎮 單人開始（共 5 關）
-    </button>
-
+    <button class="lbtn" onclick="startSolo()" style="background:linear-gradient(135deg,#4030a0,#2a1870);box-shadow:0 4px 20px rgba(60,30,160,.4),inset 0 1px 0 rgba(255,255,255,.12);">🎮 單人開始（共 5 關）</button>
     <div class="sep"><div class="sep-line"></div><div class="sep-txt">線上對戰</div><div class="sep-line"></div></div>
-
-    <button class="lbtn" onclick="createRoom()" style="background:linear-gradient(135deg,#e94560,#8e1830);box-shadow:0 4px 20px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);">
-      🔗 建立房間 · 邀請朋友
-    </button>
-
-    <div class="sep"><div class="sep-line"></div><div class="sep-txt">收到邀請碼？在這裡加入</div><div class="sep-line"></div></div>
-
-    <div style="background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.2);border-radius:10px;padding:12px 14px;">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:8px;">朋友傳給你邀請碼，輸入後加入對戰！</div>
-      <input class="code-inp" id="codeInp" placeholder="輸入 6 位邀請碼" maxlength="8" style="margin-bottom:8px;">
-      <button class="lbtn" onclick="joinRoom()" style="background:linear-gradient(135deg,#06b060,#047a40);box-shadow:0 4px 20px rgba(6,160,80,.35),inset 0 1px 0 rgba(255,255,255,.12);margin-bottom:0;">
-        ✅ 加入朋友的房間
-      </button>
-    </div>
-
-    <div class="invite-box" id="inviteBox">
-      <div style="font-size:11px;color:var(--text2);">📋 把邀請碼傳給朋友：</div>
-      <div class="invite-code-big" id="roomCodeDisp"></div>
-      <div style="display:flex;gap:7px;">
-        <button class="btn btn-green" style="font-size:11.5px;padding:6px 12px;flex:1;" onclick="copyLink()">📋 複製連結</button>
-        <button class="btn" style="font-size:11.5px;padding:6px 12px;flex:1;" onclick="shareLink()">📤 分享</button>
-      </div>
-      <div class="waiting"><div class="wdot"></div><div style="font-size:12px;color:var(--green);" id="waitTxt">等待朋友輸入邀請碼加入…</div></div>
-    </div>
+    <button class="lbtn" onclick="createRoom()" style="background:linear-gradient(135deg,#e94560,#8e1830);box-shadow:0 4px 20px rgba(233,69,96,.4),inset 0 1px 0 rgba(255,255,255,.12);">🔗 建立房間 · 邀請朋友</button>
+    <div class="sep"><div class="sep-line"></div><div class="sep-txt">收到邀請碼</div><div class="sep-line"></div></div>
+    <input class="code-inp" id="codeInp" placeholder="輸入邀請碼" maxlength="8">
+    <button class="lbtn" onclick="joinRoom()" style="background:linear-gradient(135deg,#06b060,#047a40);box-shadow:0 4px 20px rgba(6,160,80,.35),inset 0 1px 0 rgba(255,255,255,.12);margin-bottom:0;">✅ 加入朋友的房間</button>
   </div>
 </div>
 
 <!-- GAME -->
-<div id="game" onclick="if(document.activeElement.tagName!=='INPUT')focusGame()">
+<div id="game">
   <header>
     <div class="logo">金剛爬塔 🦍</div>
     <div style="display:flex;gap:5px;">
@@ -192,69 +161,55 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     </div>
   </header>
 
-  <!-- HUD -->
-  <div class="hud-row">
-    <div class="hud-block">
-      <div class="hud-val" style="color:var(--gold);" id="hudScore">0</div>
-      <div class="hud-label">分數</div>
-    </div>
-    <div class="hud-block">
-      <div class="hud-val" style="color:var(--red);" id="hudLives">❤️❤️❤️</div>
-      <div class="hud-label">生命</div>
-    </div>
-    <div class="hud-block" style="flex:1;display:flex;align-items:center;gap:8px;">
-      <div style="font-size:9px;color:#ff8090;white-space:nowrap;">高度</div>
-      <div class="hbar-wrap"><div class="hbar" id="hbar" style="width:0%"></div></div>
-    </div>
-    <div class="hud-block">
-      <div class="hud-val" style="color:var(--teal);" id="hudLevel">1</div>
-      <div class="hud-label" id="hudLevelLabel">關卡</div>
-    </div>
-  </div>
-
-  <!-- 對手資訊列（對戰模式才顯示）-->
-  <div id="oppInfoRow" style="display:none;width:100%;background:rgba(0,200,240,.05);border:1px solid rgba(0,200,240,.2);border-radius:10px;padding:8px 14px;margin-bottom:5px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <div style="font-size:11px;color:var(--teal);font-weight:700;">🎮 <span id="oppNameD">對手</span></div>
-        <div style="font-size:9px;color:var(--text2);" id="oppLvlD">尚未加入</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="text-align:center;">
-          <div style="font-size:16px;font-weight:900;color:var(--teal);" id="oppScoreD">0</div>
-          <div style="font-size:9px;color:var(--text2);">分數</div>
-        </div>
-        <div style="font-size:13px;" id="oppLivesD" style="opacity:.4;">❤️❤️❤️</div>
-      </div>
-      <div style="flex:1;min-width:80px;max-width:120px;">
-        <div style="font-size:9px;color:var(--text2);margin-bottom:3px;">高度</div>
-        <div style="height:4px;background:#1a1a38;border-radius:2px;overflow:hidden;">
-          <div style="height:100%;border-radius:2px;background:linear-gradient(90deg,var(--teal),#0860a0);width:0%;transition:width .2s;" id="oppHbar"></div>
-        </div>
+  <!-- 我的 HUD -->
+  <div class="hud">
+    <div class="hud-row">
+      <div class="hb"><div class="hb-val" style="color:var(--gold);" id="myScore">0</div><div class="hb-lbl">分數</div></div>
+      <div class="hud-div"></div>
+      <div class="hb"><div class="hb-val" style="color:var(--red);" id="myLives">❤️❤️❤️</div><div class="hb-lbl">生命</div></div>
+      <div class="hud-div"></div>
+      <div class="hb"><div class="hb-val" style="color:var(--teal);" id="myLevel">1</div><div class="hb-lbl">關卡</div></div>
+      <div class="hud-div"></div>
+      <div class="hbar-wrap">
+        <div style="font-size:9px;color:var(--text2);">高度</div>
+        <div class="hbar-bg"><div class="hbar-fill" id="myHbar" style="width:0%;background:linear-gradient(90deg,var(--red),#c02040);"></div></div>
       </div>
     </div>
   </div>
 
-  <!-- 邀請碼（對戰模式才顯示）-->
-  <div id="gameInviteRow" style="display:none;width:100%;background:rgba(6,214,160,.06);border:1px solid rgba(6,214,160,.25);border-radius:10px;padding:11px 14px;margin-bottom:6px;">
-    <div style="font-size:10px;color:var(--text2);margin-bottom:6px;line-height:1.6;">
-      ① 把下方邀請碼傳給朋友<br>
-      ② 朋友打開同一個網址，在大廳輸入邀請碼即可加入
-    </div>
+  <!-- 邀請碼列 -->
+  <div class="invite-row" id="inviteRow">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div>
-        <div style="font-size:10px;color:var(--text2);margin-bottom:2px;">邀請碼</div>
-        <div style="font-size:28px;font-weight:900;color:var(--gold);letter-spacing:7px;font-family:monospace;" id="gameRoomCode"></div>
+        <div style="font-size:10px;color:var(--text2);margin-bottom:3px;">📋 把邀請碼傳給朋友，他在大廳輸入即可加入</div>
+        <div style="font-size:26px;font-weight:900;color:var(--gold);letter-spacing:6px;font-family:monospace;" id="inviteCode"></div>
       </div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap;">
-        <button class="btn btn-green" style="font-size:11.5px;padding:6px 12px;" onclick="copyLink()">📋 複製連結</button>
-        <button class="btn" style="font-size:11.5px;padding:6px 12px;" onclick="shareLink()">📤 分享</button>
+      <div style="display:flex;gap:7px;">
+        <button class="btn btn-green" style="font-size:11px;padding:5px 10px;" onclick="copyLink()">📋 複製</button>
+        <button class="btn" style="font-size:11px;padding:5px 10px;" onclick="shareLink()">📤 分享</button>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:7px;margin-top:8px;" id="gameWaitRow">
+    <div id="waitRow" style="display:flex;align-items:center;gap:7px;margin-top:7px;">
       <div class="wdot"></div>
-      <div style="font-size:11.5px;color:var(--green);">等待朋友在大廳輸入邀請碼加入…</div>
+      <div style="font-size:11px;color:var(--green);">等待朋友在大廳輸入邀請碼加入…</div>
     </div>
+  </div>
+
+  <!-- 對手 HUD -->
+  <div class="opp-row" id="oppRow">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+      <div style="font-size:11px;font-weight:700;color:var(--teal);">🎮 <span id="oppName">對手</span></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="hb"><div class="hb-val" style="color:var(--teal);font-size:15px;" id="oppScore">0</div><div class="hb-lbl">分數</div></div>
+        <div class="hb"><div class="hb-val" style="color:var(--teal);font-size:13px;" id="oppLives">-</div><div class="hb-lbl">生命</div></div>
+        <div class="hb"><div class="hb-val" style="color:var(--teal);font-size:15px;" id="oppLevel">-</div><div class="hb-lbl">關卡</div></div>
+      </div>
+      <div style="flex:1;min-width:80px;">
+        <div style="font-size:9px;color:var(--text2);margin-bottom:3px;">高度</div>
+        <div class="hbar-bg"><div class="hbar-fill" id="oppHbar" style="width:0%;background:linear-gradient(90deg,var(--teal),#0860a0);"></div></div>
+      </div>
+    </div>
+    <div style="font-size:10px;color:var(--text2);margin-top:5px;" id="oppStatus">等待加入…</div>
   </div>
 
   <!-- Canvas -->
@@ -279,31 +234,30 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
     </div>
     <button class="jb" onpointerdown="kd('jump')" onpointerup="ku('jump')" onpointercancel="ku('jump')">🦘<br><span style="font-size:9px;">跳</span></button>
   </div>
-  <div class="hint">🖥️ 電腦：← → 移動 · ↑ 或 空白鍵 跳躍（不需要先點畫面）</div>
+  <div class="hint">🖥️ 電腦：← → 移動 · ↑ 或 空白鍵 跳躍</div>
 
-  <!-- Chat (hidden in solo) -->
-  <div class="chat" id="chatBox" style="display:none;">
+  <!-- Chat -->
+  <div class="chat" id="chatBox">
     <div class="chat-hdr">
-      <div style="display:flex;align-items:center;gap:7px;">
-        <div class="cdot" id="cDot"></div>
-        <div>
-          <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);">💬 即時聊天</div>
-          <div style="font-size:9.5px;color:#2a2a68;" id="cOnTxt">連線中…</div>
-        </div>
+      <div class="cdot" id="cDot"></div>
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text2);">💬 即時聊天</div>
+        <div style="font-size:9.5px;color:#2a2a68;" id="cOnTxt">連線中…</div>
       </div>
     </div>
     <div class="chat-msgs" id="chatMsgs">
-      <div class="cm sy"><div class="cm-b">🎮 歡迎！邀請朋友一起玩！</div></div>
+      <div class="cm sy"><div class="cm-b">🎮 歡迎！邀請朋友一起對戰！</div></div>
     </div>
     <div class="qr-row">
       <button class="qr" onclick="qr('🔥 超猛！')">🔥猛</button>
       <button class="qr" onclick="qr('💀 被打到了！')">💀死了</button>
       <button class="qr" onclick="qr('🏆 我過關了！')">🏆過關</button>
       <button class="qr" onclick="qr('👏 加油！')">👏加油</button>
-      <button class="qr" onclick="qr('🎯 再來！')">🎯再來</button>
+      <button class="qr" onclick="qr('🎯 再來一局！')">🎯再來</button>
+      <button class="qr" onclick="qr('😂 哈哈哈！')">😂哈哈</button>
     </div>
     <div class="chat-inp-row">
-      <input class="cinp" id="chatInp" placeholder="說點什麼…" maxlength="80">
+      <input class="cinp" id="chatInp" placeholder="說點什麼…（Enter 送出）" maxlength="80">
       <button class="csend" onclick="sendChat()">➤</button>
     </div>
   </div>
@@ -312,362 +266,254 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 <div class="toast" id="toastEl"></div>
 
 <script>
-// ═══════════════════════════════════════
-//  SERVER URL — 改成你的 Render 網址
-// ═══════════════════════════════════════
-const SERVER_URL = 'https://kong-server-q68o.onrender.com';
+// ═══════════════════════════════════
+//  SERVER
+// ═══════════════════════════════════
+const SERVER_URL='https://kong-server-q68o.onrender.com';
 
-// ═══════════════════════════════════════
-//  DIFFICULTY
-// ═══════════════════════════════════════
-const DIFF = {
-  easy:   {lives:5, barrelMul:0.6, interval:1.6, label:'😊 簡單', color:'#06d6a0'},
-  normal: {lives:3, barrelMul:1.0, interval:1.0, label:'🧑 普通', color:'#f5a623'},
-  hard:   {lives:2, barrelMul:1.5, interval:0.65,label:'💀 困難', color:'#e94560'},
+// ═══════════════════════════════════
+//  SOUND
+// ═══════════════════════════════════
+let AC=null,soundOn=true;
+function getAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();return AC;}
+function snd(t){if(!soundOn)return;try{const ac=getAC(),n=ac.currentTime;
+  if(t==='jump'){const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.setValueAtTime(220,n);o.frequency.exponentialRampToValueAtTime(440,n+.12);g.gain.setValueAtTime(.15,n);g.gain.exponentialRampToValueAtTime(.001,n+.18);o.start(n);o.stop(n+.18);}
+  if(t==='hit'){const b=ac.createBuffer(1,ac.sampleRate*.4,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);const s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=400;s.buffer=b;s.connect(f);f.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.5,n);g.gain.exponentialRampToValueAtTime(.001,n+.4);s.start(n);}
+  if(t==='win'){[523,659,784,1047].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=f;const tt=n+i*.1;g.gain.setValueAtTime(.12,tt);g.gain.exponentialRampToValueAtTime(.001,tt+.12);o.start(tt);o.stop(tt+.14);});}
+  if(t==='death'){[300,250,200,160].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sawtooth';o.frequency.value=f;const tt=n+i*.1;g.gain.setValueAtTime(.12,tt);g.gain.exponentialRampToValueAtTime(.001,tt+.1);o.start(tt);o.stop(tt+.11);});}
+  if(t==='barrel'){const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sawtooth';o.frequency.setValueAtTime(80,n);o.frequency.linearRampToValueAtTime(60,n+.15);g.gain.setValueAtTime(.06,n);g.gain.exponentialRampToValueAtTime(.001,n+.15);o.start(n);o.stop(n+.15);}
+  if(t==='climb'){const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=660;g.gain.setValueAtTime(.05,n);g.gain.exponentialRampToValueAtTime(.001,n+.06);o.start(n);o.stop(n+.06);}
+}catch(e){}}
+function toggleSound(){soundOn=!soundOn;document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇';}
+
+// ═══════════════════════════════════
+//  DIFFICULTY & LEVELS
+// ═══════════════════════════════════
+const DIFF={
+  easy:  {lives:5,barrelMul:.6,interval:1.6,label:'😊 簡單'},
+  normal:{lives:3,barrelMul:1.0,interval:1.0,label:'🧑 普通'},
+  hard:  {lives:2,barrelMul:1.5,interval:.65,label:'💀 困難'},
 };
-let diff = 'normal';
-
-function setDiff(d) {
-  diff = d;
-  ['easy','normal','hard'].forEach(k => {
-    const b = document.getElementById('d-'+k);
-    const cfg = DIFF[k];
-    const on = k === d;
-    b.style.borderColor = on ? cfg.color : cfg.color+'66';
-    b.style.background = on ? cfg.color+'18' : '';
-    b.style.color = cfg.color;
-    b.style.boxShadow = on ? `0 0 0 1px ${cfg.color}44` : 'none';
-    b.classList.toggle('active', on);
+let curDiff='normal';
+function setDiff(d){
+  curDiff=d;
+  ['easy','normal','hard'].forEach(k=>{
+    const b=document.getElementById('d-'+k);
+    const on=k===d;
+    const colors={easy:'rgba(6,214,160',normal:'rgba(245,166,35',hard:'rgba(233,69,96'};
+    const c=colors[k];
+    b.style.borderColor=on?`${c},1)`:(`${c},.4)`);
+    b.style.background=on?(`${c},.12)`):'#0e0e28';
+    b.style.boxShadow=on?(`0 0 0 1px ${c},.25)`):'none';
+    b.style.transform=on?'scale(1.04)':'scale(1)';
   });
 }
 
-// ═══════════════════════════════════════
-//  LEVEL CONFIGS
-// ═══════════════════════════════════════
-const LEVELS = [
-  {name:'第1關', desc:'入門爬塔',   bonus:300,  flameCnt:0, barrelBoost:1.0},
-  {name:'第2關', desc:'雙桶挑戰',   bonus:600,  flameCnt:1, barrelBoost:1.3},
-  {name:'第3關', desc:'三層火焰',   bonus:900,  flameCnt:2, barrelBoost:1.5},
-  {name:'第4關', desc:'速度地獄',   bonus:1200, flameCnt:2, barrelBoost:1.8},
-  {name:'第5關', desc:'最終決戰！', bonus:2000, flameCnt:3, barrelBoost:2.2},
+const LEVELS=[
+  {name:'第1關',desc:'入門爬塔',  bonus:300, flames:0,bBoost:1.0},
+  {name:'第2關',desc:'雙桶挑戰',  bonus:600, flames:1,bBoost:1.3},
+  {name:'第3關',desc:'三層火焰',  bonus:900, flames:2,bBoost:1.5},
+  {name:'第4關',desc:'速度地獄',  bonus:1200,flames:2,bBoost:1.8},
+  {name:'第5關',desc:'最終決戰！',bonus:2000,flames:3,bBoost:2.2},
 ];
-const MAX_LVL = 5;
+const MAX_LVL=5;
 
-// ═══════════════════════════════════════
-//  SOUND
-// ═══════════════════════════════════════
-let AC = null, soundOn = true;
-function getAC(){ if(!AC) AC = new (window.AudioContext||window.webkitAudioContext)(); return AC; }
-function snd(type){
-  if(!soundOn) return;
-  try{
-    const ac=getAC(), t=ac.currentTime;
-    if(type==='jump'){ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(440,t+.12);g.gain.setValueAtTime(.15,t);g.gain.exponentialRampToValueAtTime(.001,t+.18);o.start(t);o.stop(t+.18); }
-    if(type==='hit'){ const buf=ac.createBuffer(1,ac.sampleRate*.4,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);const s=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=400;s.buffer=buf;s.connect(f);f.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.4);s.start(t); }
-    if(type==='death'){ [392,330,277,220].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=f;const tt=t+i*.12;g.gain.setValueAtTime(.12,tt);g.gain.exponentialRampToValueAtTime(.001,tt+.1);o.start(tt);o.stop(tt+.12);}); }
-    if(type==='win'){ [523,659,784,1047].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=f;const tt=t+i*.1;g.gain.setValueAtTime(.12,tt);g.gain.exponentialRampToValueAtTime(.001,tt+.12);o.start(tt);o.stop(tt+.14);}); }
-    if(type==='barrel'){ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sawtooth';o.frequency.setValueAtTime(80,t);o.frequency.linearRampToValueAtTime(60,t+.15);g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+.15);o.start(t);o.stop(t+.15); }
-    if(type==='climb'){ const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=660;g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.06);o.start(t);o.stop(t+.06); }
-  }catch(e){}
-}
-function toggleSound(){ soundOn=!soundOn; document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇'; }
-
-// ═══════════════════════════════════════
-//  GAME VARS
-// ═══════════════════════════════════════
-const cv = document.getElementById('gc');
-const ctx = cv.getContext('2d');
-const GRAV = 0.48, BSPD = 2.4;
-let platforms=[], ladders=[], barrels=[], flames=[];
+// ═══════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════
+const cv=document.getElementById('gc');
+const ctx=cv.getContext('2d');
+const GRAV=0.48;
+let platforms=[],ladders=[],barrels=[],flames=[];
 let pl={x:0,y:0,vx:0,vy:0,w:28,h:34,onGround:false,dir:1};
 let kong={x:0,y:0,w:46,h:46,timer:0};
 let princess={x:0,y:0};
-let score=0, lives=3, level=1, totalScore=0;
-let gState='idle'; // idle | playing | dead | win | gameover
-let frames=0, scoreTimer=0;
+let score=0,lives=3,level=1,totalScore=0;
+let gState='idle',frames=0,scoreTimer=0;
 const keys={left:false,right:false,jump:false,up:false};
 const jp={v:false};
-let soloMode=false, curDiff='normal', curSoloLv=1;
 let frameId=null;
+let soloMode=false,curSoloLv=1;
 
-function CW(){ return cv.width; }
-function CH(){ return cv.height; }
-function cellW(){ return Math.floor(CW()/12); }
-function cellH(){ return Math.round(cellW()*1.1); }
+function CW(){return cv.width;}
+function CH(){return cv.height;}
+function cellW(){return Math.floor(CW()/12);}
+function cellH(){return Math.round(cellW()*1.1);}
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  BUILD LEVEL
-// ═══════════════════════════════════════
-function buildLevel(lv) {
-  const W=CW(), H=CH(), CW_=cellW(), CH_=cellH();
-  platforms=[]; ladders=[]; barrels=[]; flames=[];
-  pl.vx=0; pl.vy=0; pl.onGround=false;
-
-  const layouts = [
+// ═══════════════════════════════════
+function buildLevel(lv){
+  const W=CW(),H=CH(),CH_=cellH();
+  platforms=[];ladders=[];barrels=[];flames=[];
+  pl.vx=0;pl.vy=0;pl.onGround=false;
+  const layouts=[
     [{y:H-CH_,x:0,w:W},{y:H-CH_*4,x:0,w:W*.85},{y:H-CH_*7,x:W*.15,w:W*.85},{y:H-CH_*10,x:0,w:W*.85},{y:H-CH_*13,x:W*.1,w:W*.9}],
     [{y:H-CH_,x:0,w:W},{y:H-CH_*3.5,x:W*.1,w:W*.9},{y:H-CH_*6.5,x:0,w:W*.85},{y:H-CH_*9.5,x:W*.15,w:W*.85},{y:H-CH_*13,x:W*.05,w:W*.95}],
     [{y:H-CH_,x:0,w:W},{y:H-CH_*4,x:0,w:W*.65},{y:H-CH_*4,x:W*.72,w:W*.28},{y:H-CH_*7.5,x:W*.1,w:W*.8},{y:H-CH_*11,x:0,w:W*.9},{y:H-CH_*13,x:W*.05,w:W*.95}],
     [{y:H-CH_,x:0,w:W},{y:H-CH_*3.5,x:0,w:W*.5},{y:H-CH_*6,x:W*.35,w:W*.65},{y:H-CH_*8.5,x:0,w:W*.6},{y:H-CH_*11,x:W*.3,w:W*.7},{y:H-CH_*13,x:W*.05,w:W*.95}],
-    [{y:H-CH_,x:0,w:W},{y:H-CH_*3,x:W*.05,w:W*.45},{y:H-CH_*3,x:W*.55,w:W*.45},{y:H-CH_*6,x:0,w:W*.55},{y:H-CH_*6,x:W*.6,w:W*.4},{y:H-CH_*9,x:W*.1,w:W*.8},{y:H-CH_*12,x:0,w:W},{y:H-CH_*13,x:W*.05,w:W*.95}],
+    [{y:H-CH_,x:0,w:W},{y:H-CH_*3,x:W*.05,w:W*.45},{y:H-CH_*3,x:W*.55,w:W*.45},{y:H-CH_*6,x:0,w:W*.55},{y:H-CH_*6,x:W*.6,w:W*.4},{y:H-CH_*9,x:W*.1,w:W*.8},{y:H-CH_*13,x:W*.05,w:W*.95}],
   ];
-
-  const layout = layouts[Math.min(lv-1, layouts.length-1)];
-  layout.forEach((p,i) => platforms.push({...p, h:7, dark:i%2===0}));
-
-  // Fixed ladders per level
-  const ladderSets = [
+  const ladderSets=[
     [{x:W*.12,y:H-CH_*4,h:CH_*3},{x:W*.78,y:H-CH_*7,h:CH_*3},{x:W*.22,y:H-CH_*10,h:CH_*3},{x:W*.72,y:H-CH_*13,h:CH_*3}],
     [{x:W*.15,y:H-CH_*3.5,h:CH_*2.5},{x:W*.75,y:H-CH_*6.5,h:CH_*3},{x:W*.2,y:H-CH_*9.5,h:CH_*3},{x:W*.7,y:H-CH_*13,h:CH_*3}],
     [{x:W*.55,y:H-CH_*4,h:CH_*3.5},{x:W*.12,y:H-CH_*7.5,h:CH_*3.5},{x:W*.75,y:H-CH_*11,h:CH_*3.5},{x:W*.4,y:H-CH_*13,h:CH_*2}],
-    [{x:W*.45,y:H-CH_*3.5,h:CH_*2.5},{x:W*.12,y:H-CH_*6,h:CH_*2.5},{x:W*.62,y:H-CH_*8.5,h:CH_*2.5},{x:W*.35,y:H-CH_*11,h:CH_*2.5},{x:W*.7,y:H-CH_*13,h:CH_*2}],
-    [{x:W*.4,y:H-CH_*3,h:CH_*2},{x:W*.15,y:H-CH_*6,h:CH_*3},{x:W*.7,y:H-CH_*6,h:CH_*3},{x:W*.45,y:H-CH_*9,h:CH_*3},{x:W*.2,y:H-CH_*12,h:CH_}],
+    [{x:W*.45,y:H-CH_*3.5,h:CH_*2.5},{x:W*.12,y:H-CH_*6,h:CH_*2.5},{x:W*.62,y:H-CH_*8.5,h:CH_*2.5},{x:W*.35,y:H-CH_*11,h:CH_*2.5}],
+    [{x:W*.4,y:H-CH_*3,h:CH_*2},{x:W*.15,y:H-CH_*6,h:CH_*3},{x:W*.7,y:H-CH_*6,h:CH_*3},{x:W*.45,y:H-CH_*9,h:CH_*3}],
   ];
-  ladders = ladderSets[Math.min(lv-1, ladderSets.length-1)];
-
-  const topP = platforms[platforms.length-1];
-  kong.x = topP.x + 10; kong.y = topP.y;
-  princess.x = topP.x + topP.w - 50; princess.y = topP.y;
-  pl.x = 14; pl.y = H - CH_ - pl.h;
-
-  const lcfg = LEVELS[Math.min(lv-1, LEVELS.length-1)];
-  const dcfg = DIFF[curDiff];
-  const baseInterval = Math.max(45, 110 - lv*10);
-  kong.timer = Math.round(baseInterval * dcfg.interval * 0.8);
-
-  if(lcfg.flameCnt>0) flames.push({x:W*.3,y:H-CH_-18,vx:1.5*lcfg.barrelBoost,f:0});
-  if(lcfg.flameCnt>1) flames.push({x:W*.65,y:H-CH_-18,vx:-1.7*lcfg.barrelBoost,f:0});
-  if(lcfg.flameCnt>2 && platforms[2]) flames.push({x:W*.5,y:platforms[2].y-18,vx:1.3*lcfg.barrelBoost,f:0});
-
-  document.getElementById('hudLevel').textContent = lv;
-  document.getElementById('hudLevelLabel').textContent = `/${MAX_LVL}關`;
+  const layout=layouts[Math.min(lv-1,layouts.length-1)];
+  layout.forEach((p,i)=>platforms.push({...p,h:7,dark:i%2===0}));
+  ladders=ladderSets[Math.min(lv-1,ladderSets.length-1)];
+  const topP=platforms[platforms.length-1];
+  kong.x=topP.x+10;kong.y=topP.y;
+  princess.x=topP.x+topP.w-50;princess.y=topP.y;
+  pl.x=14;pl.y=H-CH_-pl.h;
+  const lc=LEVELS[Math.min(lv-1,LEVELS.length-1)];
+  const dc=DIFF[curDiff];
+  if(lc.flames>0)flames.push({x:W*.3,y:H-CH_-18,vx:1.5*lc.bBoost,f:0});
+  if(lc.flames>1)flames.push({x:W*.65,y:H-CH_-18,vx:-1.7*lc.bBoost,f:0});
+  if(lc.flames>2&&platforms[2])flames.push({x:W*.5,y:platforms[2].y-18,vx:1.3*lc.bBoost,f:0});
+  kong.timer=Math.round(Math.max(45,110-lv*10)*.8);
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  GAME LOOP
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 function loop(){
-  frameId = requestAnimationFrame(loop);
+  frameId=requestAnimationFrame(loop);
   frames++;
-  if(gState==='playing') tick();
+  if(gState==='playing')tick();
   draw();
-  if(!soloMode && frames%4===0 && socket && gState==='playing'){
+  // 廣播給對方（每4幀，online模式）
+  if(!soloMode&&frames%4===0&&socket&&socket.connected&&gState==='playing'){
     const topY=platforms[platforms.length-1]?.y||0;
     const ht=Math.max(0,Math.min(100,Math.round(100*(1-(pl.y-topY)/(CH()-topY)))));
-    socket.emit('pos',{x:pl.x,y:pl.y,dir:pl.dir,score,lives,level,h:ht,state:gState,nick:myNick,cw:CW(),ch:CH()});
+    socket.emit('state',{score,lives,level,ht,nick:myNick,state:gState});
   }
 }
 
 function tick(){
-  const W=CW(), H=CH();
-  // 1. 水平移動
-  pl.vx = 0;
-  if(keys.left){ pl.vx=-3.5; pl.dir=-1; }
-  if(keys.right){ pl.vx=3.5; pl.dir=1; }
-
-  // 2. 爬梯
-  let onLadder = false;
+  const W=CW(),H=CH();
+  pl.vx=0;
+  if(keys.left){pl.vx=-3.5;pl.dir=-1;}
+  if(keys.right){pl.vx=3.5;pl.dir=1;}
+  // 跳躍 — 在重力之前，用上幀 onGround
+  const jp_=keys.jump||keys.up;
+  if(jp_&&pl.onGround&&!jp.v){pl.vy=-12;pl.onGround=false;jp.v=true;snd('jump');}
+  if(!jp_)jp.v=false;
+  // 爬梯
+  let onLad=false;
   for(const l of ladders){
-    if(pl.x+pl.w*.5 > l.x-9 && pl.x+pl.w*.5 < l.x+20 &&
-       pl.y+pl.h > l.y && pl.y < l.y+l.h && keys.up){
-      pl.vy = -2.8;
-      onLadder = true;
-      if(frames%14===0) snd('climb');
+    if(pl.x+pl.w*.5>l.x-9&&pl.x+pl.w*.5<l.x+20&&pl.y+pl.h>l.y&&pl.y<l.y+l.h&&keys.up){
+      pl.vy=-2.8;onLad=true;if(frames%14===0)snd('climb');
     }
   }
-
-  // 3. 重力
-  if(!onLadder){
-    pl.vy += GRAV;
-    if(pl.vy > 16) pl.vy = 16;
-  }
-
-  // 4. 套用速度
-  pl.x += pl.vx;
-  pl.y += pl.vy;
-  pl.x = Math.max(0, Math.min(W-pl.w, pl.x));
-
-  // 5. 平台碰撞 — 先算碰撞，才知道是否 onGround
-  pl.onGround = false;
+  if(!onLad){pl.vy+=GRAV;if(pl.vy>16)pl.vy=16;}
+  pl.x+=pl.vx;pl.y+=pl.vy;
+  pl.x=Math.max(0,Math.min(W-pl.w,pl.x));
+  // 平台碰撞
+  pl.onGround=false;
   for(const p of platforms){
-    if(pl.x+pl.w > p.x+2 && pl.x < p.x+p.w-2){
-      const feet = pl.y + pl.h;
-      if(feet >= p.y && feet <= p.y + 18 && pl.vy >= 0){
-        pl.y = p.y - pl.h;
-        pl.vy = 0;
-        pl.onGround = true;
-      }
+    if(pl.x+pl.w>p.x+2&&pl.x<p.x+p.w-2){
+      const feet=pl.y+pl.h;
+      if(feet>=p.y&&feet<=p.y+18&&pl.vy>=0){pl.y=p.y-pl.h;pl.vy=0;pl.onGround=true;}
     }
   }
-
-  // 6. 跳躍 — 碰撞後才判斷 onGround，這幀就能跳
-  const jumpPressed = keys.jump || keys.up;
-  if(jumpPressed && pl.onGround && !jp.v){
-    pl.vy = -12;
-    pl.onGround = false;
-    jp.v = true;
-    snd('jump');
-  }
-  if(!jumpPressed) jp.v = false;
-
-  // Barrels
-  const dcfg=DIFF[curDiff];
-  const lcfg=LEVELS[Math.min(level-1,LEVELS.length-1)];
+  // 桶子
+  const dc=DIFF[curDiff],lc=LEVELS[Math.min(level-1,LEVELS.length-1)];
   kong.timer++;
-  const intv=Math.max(45,Math.round((110-level*10)*dcfg.interval));
-  if(kong.timer>=intv){
-    kong.timer=0;
-    barrels.push({x:kong.x+kong.w,y:kong.y+kong.h*.5,w:19,h:19,vx:BSPD*dcfg.barrelMul*lcfg.barrelBoost,vy:0,f:0});
-    snd('barrel');
-  }
-  for(let i=barrels.length-1;i>=0;i--){
-    const b=barrels[i];
-    b.vy+=GRAV*.7;b.x+=b.vx;b.y+=b.vy;
-    for(const p of platforms) if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}
-    if(b.x<-30||b.x>W+50||b.y>H+80) barrels.splice(i,1);
-    if(frames%4===0) b.f=(b.f+1)%4;
-  }
+  const intv=Math.max(45,Math.round((110-level*10)*dc.interval));
+  if(kong.timer>=intv){kong.timer=0;barrels.push({x:kong.x+kong.w,y:kong.y+kong.h*.5,w:19,h:19,vx:2.4*dc.barrelMul*lc.bBoost,vy:0,f:0});snd('barrel');}
+  for(let i=barrels.length-1;i>=0;i--){const b=barrels[i];b.vy+=GRAV*.7;b.x+=b.vx;b.y+=b.vy;for(const p of platforms)if(b.x+b.w>p.x&&b.x<p.x+p.w&&b.y+b.h>=p.y&&b.y+b.h<=p.y+15&&b.vy>=0){b.y=p.y-b.h;b.vy=0;if(level>1&&Math.random()<.22)b.vx*=-1;}if(b.x<-30||b.x>W+50||b.y>H+80)barrels.splice(i,1);if(frames%4===0)b.f=(b.f+1)%4;}
   for(const f of flames){f.x+=f.vx;if(f.x<0||f.x>W-18)f.vx*=-1;if(frames%6===0)f.f=(f.f+1)%4;}
-
-  // Hits
-  for(const b of barrels) if(Math.abs(pl.x+14-(b.x+9))<19&&Math.abs(pl.y+17-(b.y+9))<19){onHit();return;}
-  for(const f of flames) if(Math.abs(pl.x+14-f.x)<20&&Math.abs(pl.y+17-f.y)<20){onHit();return;}
+  // 碰撞
+  for(const b of barrels)if(Math.abs(pl.x+14-(b.x+9))<19&&Math.abs(pl.y+17-(b.y+9))<19){onHit();return;}
+  for(const f of flames)if(Math.abs(pl.x+14-f.x)<20&&Math.abs(pl.y+17-f.y)<20){onHit();return;}
   if(pl.y>H+40){onHit();return;}
   if(Math.abs(pl.x-princess.x)<40&&Math.abs(pl.y-princess.y)<48){onWin();return;}
-
-  // Score
+  // 計分
   scoreTimer++;
-  if(scoreTimer%60===0){score+=10*level;updateHUD();}
+  if(scoreTimer%60===0){score+=10*level;updateMyHUD();}
   const topY=platforms[platforms.length-1]?.y||0;
   const ht=Math.max(0,Math.min(1,1-(pl.y-topY)/(H-topY)));
-  if(scoreTimer%12===0&&ht>.08) score+=Math.floor(ht*4);
-  document.getElementById('hbar').style.width=Math.round(ht*100)+'%';
+  if(scoreTimer%12===0&&ht>.08)score+=Math.floor(ht*4);
+  document.getElementById('myHbar').style.width=Math.round(ht*100)+'%';
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  DRAW
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 function draw(){
-  const W=CW(),H=CH(),CW_=cellW(),CH_=cellH();
-  if(!W||!H) return;
+  const W=CW(),H=CH(),CW_=cellW();
+  if(!W||!H)return;
   ctx.clearRect(0,0,W,H);
-  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07071a');bg.addColorStop(1,'#101028');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='rgba(255,255,255,.25)';for(let i=0;i<22;i++)ctx.fillRect((i*83+11)%W,(i*57+7)%H,1,1);
-
-  for(const p of platforms){
-    const pg=ctx.createLinearGradient(p.x,p.y,p.x,p.y+p.h+6);pg.addColorStop(0,p.dark?'#4848a0':'#505098');pg.addColorStop(1,p.dark?'#2a2a60':'#303068');ctx.fillStyle=pg;ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(p.x,p.y,p.w,2);
-  }
-  for(const l of ladders){
-    ctx.fillStyle='rgba(170,110,50,.65)';ctx.fillRect(l.x,l.y,4,l.h);ctx.fillRect(l.x+13,l.y,4,l.h);
-    for(let ry=l.y+8;ry<l.y+l.h;ry+=13){ctx.fillStyle='rgba(210,150,70,.6)';ctx.fillRect(l.x,ry,17,3);}
-  }
-  for(const b of barrels){
-    ctx.save();ctx.translate(b.x+b.w/2,b.y+b.h/2);ctx.rotate(b.f*.38*(b.vx>0?1:-1));
-    const bg2=ctx.createRadialGradient(-2,-2,1,0,0,b.w*.5);bg2.addColorStop(0,'#c08040');bg2.addColorStop(1,'#804020');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#5a2810';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.stroke();ctx.restore();
-  }
+  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#07071a');bg.addColorStop(1,'#101028');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,255,255,.25)';
+  for(let i=0;i<22;i++)ctx.fillRect((i*83+11)%W,(i*57+7)%H,1,1);
+  for(const p of platforms){const pg=ctx.createLinearGradient(p.x,p.y,p.x,p.y+p.h+6);pg.addColorStop(0,p.dark?'#4848a0':'#505098');pg.addColorStop(1,p.dark?'#2a2a60':'#303068');ctx.fillStyle=pg;ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle='rgba(255,255,255,.1)';ctx.fillRect(p.x,p.y,p.w,2);}
+  for(const l of ladders){ctx.fillStyle='rgba(170,110,50,.65)';ctx.fillRect(l.x,l.y,4,l.h);ctx.fillRect(l.x+13,l.y,4,l.h);for(let ry=l.y+8;ry<l.y+l.h;ry+=13){ctx.fillStyle='rgba(210,150,70,.6)';ctx.fillRect(l.x,ry,17,3);}}
+  for(const b of barrels){ctx.save();ctx.translate(b.x+b.w/2,b.y+b.h/2);ctx.rotate(b.f*.38*(b.vx>0?1:-1));const bg2=ctx.createRadialGradient(-2,-2,1,0,0,b.w*.5);bg2.addColorStop(0,'#c08040');bg2.addColorStop(1,'#804020');ctx.fillStyle=bg2;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#5a2810';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(0,0,b.w*.47,b.h*.47,0,0,Math.PI*2);ctx.stroke();ctx.restore();}
   for(const f of flames){['#ff3010','#ff7000','#ffcc00'].forEach((c,i)=>{ctx.fillStyle=c;ctx.beginPath();const s=(14-i*3)*(1+Math.sin(frames*.2+f.x)*.08);ctx.ellipse(f.x,f.y-i*4,s*.5,s*.9,0,0,Math.PI*2);ctx.fill();});}
-
-  // Princess & Kong
-  const platY=kong.y;
-  const charSize=Math.round(CW_*.85);
-  ctx.textAlign='center';ctx.textBaseline='alphabetic';
-  ctx.font=`${charSize}px sans-serif`;
+  const platY=kong.y,cs=Math.round(CW_*.85);
+  ctx.textAlign='center';ctx.textBaseline='alphabetic';ctx.font=`${cs}px sans-serif`;
   const pM=ctx.measureText('👸');ctx.fillText('👸',princess.x+14,platY-(pM.actualBoundingBoxDescent||0));
   const kM=ctx.measureText('🦍');ctx.fillText('🦍',kong.x+kong.w/2,platY-(kM.actualBoundingBoxDescent||0));
-
-  // Player
-  ctx.font=`${Math.round(CW_*.95)}px sans-serif`;
   const em=pl.onGround?(pl.vx!==0?'🏃':'🧍'):'🤸';
+  ctx.font=`${Math.round(CW_*.95)}px sans-serif`;
   ctx.save();if(pl.dir===-1){ctx.scale(-1,1);ctx.fillText(em,-(pl.x+pl.w/2),pl.y+pl.h);}else ctx.fillText(em,pl.x+pl.w/2,pl.y+pl.h);ctx.restore();
-
-  // Score overlay
   ctx.fillStyle='rgba(255,255,255,.18)';ctx.font='bold 10px monospace';ctx.textAlign='left';ctx.fillText(`${score}分`,6,16);
-  // Key debug (顯示按鍵狀態，確認鍵盤有沒有作用)
-  ctx.fillStyle='rgba(255,255,100,.6)';ctx.font='bold 9px monospace';ctx.textAlign='right';
-  ctx.fillText(`←${keys.left?'●':'○'} →${keys.right?'●':'○'} ↑${keys.up?'●':'○'} 跳${keys.jump?'●':'○'} gnd${pl.onGround?'●':'○'}`,W-5,16);
 }
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  GAME EVENTS
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 function onHit(){
-  lives--;snd('hit');updateHUD();
-  if(!soloMode) socket?.emit('game_event',{type:'dead',score,lives,level,nick:myNick});
+  lives--;snd('hit');
+  if(!soloMode)broadcastEvent('hit',`💥 ${myNick} 被擊中！剩 ${lives} 命`);
+  updateMyHUD();
   if(lives<=0){
     gState='gameover';setTimeout(()=>snd('death'),300);
-    if(!soloMode) socket?.emit('game_event',{type:'gameover',score,lives:0,level,nick:myNick});
-    sysMsg(`💀 ${myNick} 遊戲結束！分數 ${score}`);
-    showOv('💀','遊戲結束',`分數 ${score}`,
-      `<button class="btn btn-red" onclick="restartGame()">再來一局</button><button class="btn" onclick="goLobby()">回大廳</button>`);
+    if(!soloMode)broadcastEvent('gameover',`💀 ${myNick} 遊戲結束！分數 ${score}`);
+    showOv('💀','遊戲結束',`分數 ${score}`,`<button class="btn btn-red" onclick="restartGame()">再來一局</button><button class="btn" onclick="goLobby()">回大廳</button>`);
   } else {
-    sysMsg(`💥 ${myNick} 被擊中！剩 ${lives} 命`);
-    showOv('💥','被擊中！',`剩 ${lives} 命`,
-      `<button class="btn btn-red" onclick="respawn()">繼續 ▶</button><button class="btn" onclick="restartGame()">重開</button>`);
+    showOv('💥','被擊中！',`剩 ${lives} 命`,`<button class="btn btn-red" onclick="respawn()">繼續 ▶</button><button class="btn" onclick="restartGame()">重開</button>`);
   }
 }
-
-function respawn(){
-  pl.x=14;pl.y=CH()-cellH()-pl.h;pl.vx=0;pl.vy=0;pl.onGround=false;
-  barrels=[];gState='playing';hideOv();focusGame();
-}
-
+function respawn(){pl.x=14;pl.y=CH()-cellH()-pl.h;pl.vx=0;pl.vy=0;pl.onGround=false;barrels=[];gState='playing';hideOv();focusGame();}
 function onWin(){
-  const lcfg=LEVELS[Math.min(level-1,LEVELS.length-1)];
-  score+=lcfg.bonus;totalScore=score;
-  gState='win';snd('win');updateHUD();
+  const lc=LEVELS[Math.min(level-1,LEVELS.length-1)];
+  score+=lc.bonus;totalScore=score;gState='win';snd('win');updateMyHUD();
+  if(!soloMode)broadcastEvent('win',`🏆 ${myNick} 以 ${score} 分完成${lc.name}！`);
   if(soloMode){
     if(level>=MAX_LVL){
-      showOv('🏆','全關通關！',`難度：${DIFF[curDiff].label}　總分：${score}`,
-        `<button class="btn btn-red" onclick="startSolo()">再挑戰</button><button class="btn" onclick="goLobby()">回大廳</button>`);
-      toast('🏆 恭喜完成全部 5 關！');
+      showOv('🏆','全關通關！',`難度：${DIFF[curDiff].label}\n總分：${score}`,`<button class="btn btn-red" onclick="startSolo()">再挑戰</button><button class="btn" onclick="goLobby()">回大廳</button>`);
     } else {
-      showOv('🎉',`${lcfg.name}過關！`,`獎勵 +${lcfg.bonus}　累計 ${score} 分`,
-        `<button class="btn btn-green" onclick="nextSoloLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
+      showOv('🎉',`${lc.name}過關！`,`獎勵 +${lc.bonus}　累計 ${score} 分`,`<button class="btn btn-green" onclick="nextSoloLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
     }
   } else {
-    socket?.emit('game_event',{type:'win',score,lives,level,nick:myNick});
-    socket?.emit('score_update',{score,lives,level,nick:myNick});
-    sysMsg(`🏆 ${myNick} 以 ${score} 分完成第 ${level} 關！`);
-    showOv('🏆','過關！',`分數 ${score}　第 ${level} 關`,
-      `<button class="btn btn-green" onclick="nextOnlineLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
+    showOv('🏆','過關！',`分數 ${score}　${lc.name}`,`<button class="btn btn-green" onclick="nextOnlineLv()">下一關 →</button><button class="btn" onclick="restartGame()">重開</button>`);
   }
 }
+function nextSoloLv(){curSoloLv++;level=curSoloLv;gState='playing';barrels=[];flames=[];scoreTimer=0;buildLevel(level);hideOv();updateMyHUD();focusGame();}
+function nextOnlineLv(){level=Math.min(level+1,3);gState='playing';barrels=[];buildLevel(level);hideOv();updateMyHUD();focusGame();}
 
-function nextSoloLv(){
-  curSoloLv++;level=curSoloLv;
-  gState='playing';barrels=[];flames=[];scoreTimer=0;
-  buildLevel(level);hideOv();updateHUD();focusGame();
-  toast(`🎮 ${LEVELS[level-1].name}：${LEVELS[level-1].desc}`);
+// ═══════════════════════════════════
+//  HUD
+// ═══════════════════════════════════
+function updateMyHUD(){
+  document.getElementById('myScore').textContent=score;
+  document.getElementById('myLevel').textContent=level;
+  const dc=DIFF[curDiff],ml=soloMode?dc.lives:3;
+  document.getElementById('myLives').textContent='❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(Math.max(0,ml-lives));
 }
-function nextOnlineLv(){
-  level=Math.min(level+1,3);gState='playing';barrels=[];
-  buildLevel(level);hideOv();updateHUD();focusGame();
+function updateOppHUD(d){
+  document.getElementById('oppScore').textContent=d.score||0;
+  document.getElementById('oppLevel').textContent=`第${d.level||1}關`;
+  document.getElementById('oppLives').textContent='❤️'.repeat(Math.max(0,d.lives||0));
+  document.getElementById('oppHbar').style.width=(d.ht||0)+'%';
+  document.getElementById('oppStatus').textContent=`分數 ${d.score} · 第 ${d.level} 關 · ${d.lives} 命`;
 }
-
-// ═══════════════════════════════════════
-//  GAME START / RESTART
-// ═══════════════════════════════════════
-function beginGame(){
-  score=soloMode?totalScore:0;
-  lives=DIFF[curDiff].lives;
-  gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
-  buildLevel(soloMode?curSoloLv:1);
-  hideOv();updateHUD();
-  // 確保 canvas 有焦點，鍵盤才能作用
-  setTimeout(focusGame,50);
-}
-
-function restartGame(){
-  curSoloLv=1;totalScore=0;level=1;score=0;
-  lives=DIFF[curDiff].lives;
-  gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
-  buildLevel(1);hideOv();updateHUD();focusGame();
-}
-
-function focusGame(){ cv.focus(); }
-
-// ═══════════════════════════════════════
-//  OVERLAY
-// ═══════════════════════════════════════
 function showOv(em,ttl,sub,btns){
   document.getElementById('ovEm').textContent=em;
   document.getElementById('ovTtl').textContent=ttl;
@@ -675,84 +521,169 @@ function showOv(em,ttl,sub,btns){
   document.getElementById('ovBtns').innerHTML=btns||'';
   document.getElementById('mainOv').classList.add('show');
 }
-function hideOv(){ document.getElementById('mainOv').classList.remove('show'); }
+function hideOv(){document.getElementById('mainOv').classList.remove('show');}
+function focusGame(){cv.focus();}
 
-// ═══════════════════════════════════════
-//  HUD
-// ═══════════════════════════════════════
-function updateHUD(){
-  document.getElementById('hudScore').textContent=score;
-  document.getElementById('hudLevel').textContent=level;
-  const maxL=DIFF[curDiff].lives;
-  document.getElementById('hudLives').textContent='❤️'.repeat(Math.max(0,lives))+'🖤'.repeat(Math.max(0,maxL-lives));
-}
-
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  KEYBOARD
-// ═══════════════════════════════════════
-function kd(k){
-  if(k==='left') keys.left=true;
-  if(k==='right') keys.right=true;
-  if(k==='up') keys.up=true;
-  if(k==='jump') keys.jump=true;
-  document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.add('pressed');
-}
-function ku(k){
-  if(k==='left') keys.left=false;
-  if(k==='right') keys.right=false;
-  if(k==='up') keys.up=false;
-  if(k==='jump') keys.jump=false;
-  document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.remove('pressed');
-}
-// 鍵盤 - 三層保險
-function handleKey(e, down){
-  if(document.activeElement.tagName==='INPUT') return;
+// ═══════════════════════════════════
+function kd(k){if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='up')keys.up=true;if(k==='jump')keys.jump=true;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.add('pressed');}
+function ku(k){if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='up')keys.up=false;if(k==='jump')keys.jump=false;document.getElementById('d'+k[0].toUpperCase()+k.slice(1))?.classList.remove('pressed');}
+function handleKey(e,dn){
+  if(document.activeElement.tagName==='INPUT')return;
   const k=e.key;
-  if(k==='ArrowLeft'||k==='a'||k==='A'){if(down)e.preventDefault(); down?kd('left'):ku('left');}
-  if(k==='ArrowRight'||k==='d'||k==='D'){if(down)e.preventDefault(); down?kd('right'):ku('right');}
-  if(k==='ArrowUp'||k==='w'||k==='W'){if(down)e.preventDefault(); down?kd('up'):ku('up'); down?kd('jump'):ku('jump');}
-  if(k===' '||k==='z'||k==='Z'){if(down)e.preventDefault(); down?kd('jump'):ku('jump');}
+  if(k==='ArrowLeft'||k==='a'){if(dn)e.preventDefault();dn?kd('left'):ku('left');}
+  if(k==='ArrowRight'||k==='d'){if(dn)e.preventDefault();dn?kd('right'):ku('right');}
+  if(k==='ArrowUp'||k==='w'){if(dn)e.preventDefault();dn?kd('up'):ku('up');dn?kd('jump'):ku('jump');}
+  if(k===' '||k==='z'){if(dn)e.preventDefault();dn?kd('jump'):ku('jump');}
 }
 document.addEventListener('keydown',e=>handleKey(e,true),true);
 document.addEventListener('keyup',e=>handleKey(e,false),true);
-window.addEventListener('keydown',e=>handleKey(e,true),true);
-window.addEventListener('keyup',e=>handleKey(e,false),true);
-cv.addEventListener('touchstart',e=>{},{passive:true});
 window.addEventListener('resize',()=>{if(document.getElementById('game').style.display!=='none'){cv.width=Math.min(window.innerWidth-18,540);cv.height=Math.round(cv.width*1.28);buildLevel(level);}});
 
-// ═══════════════════════════════════════
-//  LOBBY
-// ═══════════════════════════════════════
-let myNick='玩家',myRoom='',inviteLink='',socket=null,oppConnected=false;
+// ═══════════════════════════════════
+//  CHAT
+// ═══════════════════════════════════
+let myNick='玩家',myRoom='',inviteLink='',soloModeActive=false;
+let socket=null,oppConnected=false;
 const seenMsgs=new Set();
 
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function fmtT(ts){return new Date(ts).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});}
+
+function renderMsg(data){
+  const id=data.id||(data.ts+'_'+(data.nick||''));
+  if(seenMsgs.has(id))return;
+  seenMsgs.add(id);
+  const isMe=data.nick===myNick,isSys=data.type==='system';
+  const el=document.getElementById('chatMsgs');
+  const w=document.createElement('div');
+  if(isSys){
+    w.className='cm sy';
+    w.innerHTML=`<div class="cm-b">${esc(data.text||'')}</div>`;
+  } else {
+    w.className='cm '+(isMe?'me':'op');
+    const color=isMe?'var(--red)':'var(--teal)';
+    const ava=isMe?'😊':'🎮';
+    w.innerHTML=`<div class="cm-meta"><div class="cm-ava" style="background:${color}22;">${ava}</div><span class="cm-name" style="color:${color}">${esc(data.nick||'')}</span><span class="cm-time">${fmtT(data.ts||Date.now())}</span></div><div class="cm-b">${esc(data.text||'')}</div>`;
+  }
+  el.appendChild(w);
+  el.scrollTop=el.scrollHeight;
+}
+
+// sysMsg：本地顯示 + 廣播
+function sysMsg(text){
+  const msg={type:'system',text,ts:Date.now(),nick:'系統',id:'sys'+Date.now()+Math.random()};
+  renderMsg(msg);
+  if(socket&&socket.connected&&!soloMode) socket.emit('chat',msg);
+}
+
+// broadcastEvent：只廣播，不本地顯示
+function broadcastEvent(type,text){
+  if(!socket||!socket.connected)return;
+  const msg={type:'system',text,ts:Date.now(),nick:'系統',id:'evt'+Date.now()+Math.random()};
+  socket.emit('chat',msg);
+  renderMsg(msg); // 自己也看到
+}
+
+// sendChat：自己打的字
+function sendChat(text){
+  const inp=document.getElementById('chatInp');
+  const val=(text||inp.value).trim();
+  if(!val)return;
+  if(!text)inp.value='';
+  const msg={nick:myNick,text:val,ts:Date.now(),type:'chat',id:'msg'+Date.now()+Math.random()};
+  renderMsg(msg); // 自己先顯示
+  if(socket&&socket.connected) socket.emit('chat',msg); // 發給伺服器廣播
+}
+function qr(t){sendChat(t);}
+document.getElementById('chatInp').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
+});
+
+// ═══════════════════════════════════
+//  SOCKET — 乾淨的事件架構
+// ═══════════════════════════════════
+function connectSocket(){
+  if(socket&&socket.connected)return;
+  socket=io(SERVER_URL,{transports:['websocket','polling']});
+
+  socket.on('connect',()=>{
+    document.getElementById('cDot').classList.add('on');
+    document.getElementById('cOnTxt').textContent='已連線';
+    // 加入房間
+    socket.emit('join_room',{roomCode:myRoom,nick:myNick});
+  });
+
+  socket.on('disconnect',()=>{
+    document.getElementById('cDot').classList.remove('on');
+    document.getElementById('cOnTxt').textContent='已斷線';
+  });
+
+  // 房間人員更新
+  socket.on('room_update',data=>{
+    const others=(data.players||[]).filter(p=>p.id!==socket.id);
+    if(others.length>0&&!oppConnected){
+      oppConnected=true;
+      const oNick=others[0].nick||'朋友';
+      document.getElementById('oppName').textContent=oNick;
+      document.getElementById('oppRow').classList.add('show');
+      // 更新等待列
+      document.getElementById('waitRow').innerHTML=`<div style="display:flex;align-items:center;gap:7px;"><div style="width:7px;height:7px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px rgba(245,166,35,.5);"></div><div style="font-size:11px;color:var(--gold);font-weight:700;">${oNick} 已加入！雙方在線 🎮</div></div>`;
+      toast(`👥 ${oNick} 加入了！`);
+      showOv('🤝',`${oNick} 加入了！`,'雙方都在線，開始對戰吧！',`<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
+      // 廣播給雙方
+      const msg={type:'system',text:`🎮 ${oNick} 加入房間！可以開始對戰了！`,ts:Date.now(),nick:'系統',id:'join'+Date.now()};
+      socket.emit('chat',msg);
+      renderMsg(msg);
+    }
+  });
+
+  // 收到對方狀態（分數、生命、關卡、高度）
+  socket.on('state',data=>{
+    if(data.nick&&data.nick!==myNick){
+      updateOppHUD(data);
+    }
+  });
+
+  // 收到聊天訊息
+  socket.on('chat',data=>{
+    if(data.nick!==myNick){ // 只顯示對方的，自己的已本地顯示
+      renderMsg(data);
+    }
+  });
+
+  // 歷史訊息
+  socket.on('chat_history',msgs=>{
+    msgs.forEach(m=>{
+      if(m.nick!==myNick) renderMsg(m);
+    });
+  });
+}
+
+// ═══════════════════════════════════
+//  LOBBY ACTIONS
+// ═══════════════════════════════════
 function startSolo(){
   myNick=document.getElementById('nickInp').value.trim()||'玩家';
   localStorage.setItem('kongNick',myNick);
-  soloMode=true; curDiff=diff; curSoloLv=1; totalScore=0;
-  showGame();
-  const lcfg=LEVELS[0];
-  showOv('🦍',`${lcfg.name}`,`${lcfg.desc}　難度：${DIFF[curDiff].label}\n躲避滾桶，爬上頂端救出公主！`,
-    `<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
+  soloMode=true;soloModeActive=true;curSoloLv=1;totalScore=0;
+  showGameScreen(true);
+  showOv('🦍',LEVELS[0].name,`${LEVELS[0].desc}　難度：${DIFF[curDiff].label}`,`<button class="btn btn-red" onclick="beginGame()">▶ 開始！</button>`);
 }
 
 function createRoom(){
   myNick=document.getElementById('nickInp').value.trim()||'玩家';
   localStorage.setItem('kongNick',myNick);
-  soloMode=false;
+  soloMode=false;soloModeActive=false;
   myRoom=Math.random().toString(36).slice(2,8).toUpperCase();
   const base=location.href.split('?')[0];
   inviteLink=`${base}?room=${myRoom}`;
+  showGameScreen(false);
+  document.getElementById('inviteRow').classList.add('show');
+  document.getElementById('inviteCode').textContent=myRoom;
+  showOv('🦍','等待朋友加入','把邀請碼傳給朋友！\n朋友加入後開始遊戲。','');
   connectSocket();
-  setTimeout(()=>{socket.emit('join_room',{roomCode:myRoom,nick:myNick});},600);
-  showGame();
-  // 顯示邀請碼在遊戲畫面
-  document.getElementById('gameInviteRow').style.display='block';
-  document.getElementById('gameRoomCode').textContent=myRoom;
-  document.getElementById('chatBox').style.display='block';
-  showOv('🦍','等待朋友加入',
-    `邀請碼：${myRoom}\n把邀請碼傳給朋友！`,
-    `<button class="btn btn-red" onclick="beginGame()">▶ 我先開始</button>`);
 }
 
 function joinRoom(){
@@ -760,40 +691,46 @@ function joinRoom(){
   localStorage.setItem('kongNick',myNick);
   const code=document.getElementById('codeInp').value.trim().toUpperCase();
   if(!code){toast('請輸入邀請碼！');return;}
-  soloMode=false; myRoom=code;
-  connectSocket();
-  setTimeout(()=>{
-    socket.emit('join_room',{roomCode:myRoom,nick:myNick});
-    // 加入後讀取房間現有玩家
-    socket.once('room_update',data=>{
-      const others=data.players.filter(p=>p.id!==socket.id);
-      if(others.length>0){
-        const hostNick=others[0].nick||'朋友';
-        showOv('🤝',`成功加入！`,`房主是 ${hostNick}\n雙方都在線，開始對戰吧！`,
-          `<button class="btn btn-red" onclick="beginGame()">▶ 開始遊戲！</button>`);
-        sysMsg(`🎮 你加入了 ${hostNick} 的房間！`);
-        toast(`✅ 成功加入 ${hostNick} 的房間！`);
-      }
-    });
-  },600);
-  showGame();
+  soloMode=false;soloModeActive=false;myRoom=code;
+  showGameScreen(false);
   showOv('⏳','連線中…','正在加入房間，請稍候…','');
-  document.getElementById('chatBox').style.display='block';
+  connectSocket();
 }
 
-function showGame(){
+function beginGame(){
+  score=soloMode?totalScore:0;
+  lives=DIFF[curDiff].lives;
+  level=soloMode?curSoloLv:1;
+  gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
+  buildLevel(level);hideOv();updateMyHUD();
+  setTimeout(focusGame,50);
+  if(!soloMode)sysMsg(`🎮 ${myNick} 開始遊戲！第 ${level} 關`);
+}
+
+function restartGame(){
+  if(soloMode){curSoloLv=1;totalScore=0;}
+  score=0;lives=DIFF[curDiff].lives;level=1;
+  gState='playing';scoreTimer=0;frames=0;barrels=[];flames=[];
+  buildLevel(1);hideOv();updateMyHUD();
+  setTimeout(focusGame,50);
+  if(!soloMode)sysMsg(`🔄 ${myNick} 重新開始`);
+}
+
+function showGameScreen(solo){
   document.getElementById('lobby').style.display='none';
   document.getElementById('game').style.display='block';
   cv.width=Math.min(window.innerWidth-18,540);
   cv.height=Math.round(cv.width*1.28);
-  buildLevel(1);
-  updateHUD();
-  // 單人 vs 對戰 UI 切換
-  const isOnline=!soloMode;
-  document.getElementById('oppInfoRow').style.display=isOnline?'block':'none';
-  document.getElementById('gameInviteRow').style.display='none'; // 建立房間時再顯示
-  document.getElementById('chatBox').style.display=isOnline?'block':'none';
-  if(frameId) cancelAnimationFrame(frameId);
+  buildLevel(1);updateMyHUD();
+  // 聊天室和對手面板
+  if(solo){
+    document.getElementById('chatBox').classList.remove('show');
+    document.getElementById('oppRow').classList.remove('show');
+    document.getElementById('inviteRow').classList.remove('show');
+  } else {
+    document.getElementById('chatBox').classList.add('show');
+  }
+  if(frameId)cancelAnimationFrame(frameId);
   frameId=null;
   loop();
 }
@@ -801,141 +738,30 @@ function showGame(){
 function goLobby(){
   if(frameId){cancelAnimationFrame(frameId);frameId=null;}
   gState='idle';soloMode=false;oppConnected=false;
-  document.getElementById('chatBox').style.display='none';
-  document.getElementById('gameInviteRow').style.display='none';
-  document.getElementById('oppInfoRow').style.display='none';
+  document.getElementById('chatBox').classList.remove('show');
+  document.getElementById('oppRow').classList.remove('show');
+  document.getElementById('inviteRow').classList.remove('show');
   document.getElementById('lobby').style.display='block';
   document.getElementById('game').style.display='none';
   hideOv();
 }
 
 function copyLink(){navigator.clipboard?.writeText(inviteLink).then(()=>toast('📋 連結已複製！')).catch(()=>prompt('複製：',inviteLink));}
-function shareLink(){if(navigator.share)navigator.share({title:'金剛爬塔邀請',text:'來對戰！邀請碼：'+myRoom,url:inviteLink}).catch(()=>copyLink());else copyLink();}
+function shareLink(){if(navigator.share)navigator.share({title:'金剛爬塔邀請',text:`來對戰！邀請碼：${myRoom}`,url:inviteLink}).catch(()=>copyLink());else copyLink();}
 
-// ═══════════════════════════════════════
-//  SOCKET
-// ═══════════════════════════════════════
-function connectSocket(){
-  if(socket&&socket.connected) return;
-  socket=io(SERVER_URL,{transports:['websocket','polling']});
-  socket.on('connect',()=>{document.getElementById('cDot').classList.add('on');document.getElementById('cOnTxt').textContent='已連線';});
-  socket.on('disconnect',()=>{document.getElementById('cDot').classList.remove('on');});
-  socket.on('room_update',data=>{
-    const others=data.players.filter(p=>p.id!==socket.id);
-    if(others.length>0&&!oppConnected){
-      oppConnected=true;
-      const oNick=others[0].nick||'朋友';
-      toast(`👥 ${oNick} 加入了！`);
-      // 更新對手面板
-      document.getElementById('oppNameD').textContent=oNick;
-      document.getElementById('oppLvlD').textContent='已加入！';
-      document.getElementById('oppLivesD').style.opacity='1';
-      // 更新邀請列
-      const invRow=document.getElementById('gameInviteRow');
-      if(invRow){
-        invRow.style.borderColor='rgba(245,166,35,.5)';
-        invRow.style.background='rgba(245,166,35,.06)';
-        invRow.innerHTML=`<div style="display:flex;align-items:center;gap:10px;">
-          <div style="font-size:20px;">🤝</div>
-          <div style="flex:1;"><div style="font-size:13px;font-weight:800;color:var(--gold);">${oNick} 已加入！</div>
-          <div style="font-size:11px;color:var(--text2);">雙方都在線，開始對戰！</div></div>
-          <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(6,214,160,.5);animation:pulse 1.5s infinite;"></div>
-        </div>`;
-      }
-      showOv('🤝',`${oNick} 已加入！`,'雙方都在線，開始對戰吧！',
-        `<button class="btn btn-red" onclick="beginGame()">▶ 開始遊戲！</button>`);
-      // 廣播系統訊息給雙方
-      const msg={type:'system',text:`🎮 ${oNick} 加入房間！遊戲開始！`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
-      renderMsg(msg);
-      socket.emit('chat_msg',msg);
-    }
-  });
-
-  // 收到對方位置/分數/關卡
-  socket.on('pos',data=>{
-    if(data.nick===myNick) return; // 忽略自己的回聲
-    // 更新對手 HUD
-    document.getElementById('oppScoreD').textContent=data.score||0;
-    document.getElementById('oppLvlD').textContent=`第 ${data.level||1} 關`;
-    const lh=(data.lives||0)>0?'❤️'.repeat(Math.max(0,data.lives))+'🖤'.repeat(Math.max(0,3-data.lives)):'💀';
-    document.getElementById('oppLivesD').textContent=lh;
-    document.getElementById('oppHbar').style.width=(data.h||0)+'%';
-  });
-
-  // 收到對方遊戲事件（過關、死亡）
-  socket.on('game_event',data=>{
-    if(data.nick===myNick) return;
-    if(data.type==='win'){
-      const msg={type:'system',text:`🏆 ${data.nick} 以 ${data.score} 分完成第 ${data.level} 關！`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
-      renderMsg(msg);
-    } else if(data.type==='dead'){
-      const msg={type:'system',text:`💥 ${data.nick} 被擊中！剩 ${data.lives} 命`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
-      renderMsg(msg);
-    } else if(data.type==='gameover'){
-      const msg={type:'system',text:`💀 ${data.nick} 遊戲結束，最終分數 ${data.score}`,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
-      renderMsg(msg);
-    }
-  });
-
-  socket.on('chat_msg',data=>{
-    if(data.nick!==myNick) renderMsg(data); // 只顯示對方的，自己的已本地顯示
-  });
-  socket.on('chat_history',msgs=>msgs.forEach(m=>renderMsg(m)));
-}
-
-// ═══════════════════════════════════════
-//  CHAT
-// ═══════════════════════════════════════
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function fmtT(ts){return new Date(ts).toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});}
-function renderMsg(data){
-  const id=data.id||(data.ts+'_'+data.nick);
-  if(seenMsgs.has(id))return;seenMsgs.add(id);
-  const isMe=data.nick===myNick,isSys=data.type==='system';
-  const el=document.getElementById('chatMsgs');
-  const w=document.createElement('div');
-  if(isSys){w.className='cm sy';w.innerHTML=`<div class="cm-b">${esc(data.text||'')}</div>`;}
-  else{
-    w.className='cm '+(isMe?'me':'op');
-    const color=isMe?'var(--red)':'var(--teal)';
-    w.innerHTML=`<div class="cm-meta"><div class="cm-ava" style="background:${color}22;">${isMe?'😊':'🎮'}</div><span class="cm-name" style="color:${color}">${esc(data.nick||'')}</span><span class="cm-time">${fmtT(data.ts)}</span></div><div class="cm-b">${esc(data.text||'')}</div>`;
-  }
-  el.appendChild(w);el.scrollTop=el.scrollHeight;
-}
-// sysMsg — 本地顯示 + 廣播給對方
-function sysMsg(text){
-  const msg={type:'system',text,ts:Date.now(),nick:'系統',id:'sys'+Date.now()};
-  renderMsg(msg);
-  if(socket&&!soloMode) socket.emit('chat_msg',msg);
-}
-
-// sendChat — 自己打的字也廣播
-function sendChat(text){
-  const inp=document.getElementById('chatInp');
-  const val=(text||inp.value).trim();if(!val)return;
-  if(!text)inp.value='';
-  const msg={nick:myNick,text:val,ts:Date.now(),type:'chat',id:'m'+Date.now()};
-  renderMsg(msg); // 自己先顯示
-  if(socket&&!soloMode) socket.emit('chat_msg',msg); // 廣播給對方
-}
-function qr(t){sendChat(t);}
-document.getElementById('chatInp').addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}
-});
-
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  TOAST
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 let tTmr=null;
 function toast(msg){const el=document.getElementById('toastEl');el.textContent=msg;el.classList.add('show');if(tTmr)clearTimeout(tTmr);tTmr=setTimeout(()=>el.classList.remove('show'),3200);}
 
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 //  BOOT
-// ═══════════════════════════════════════
+// ═══════════════════════════════════
 const sn=localStorage.getItem('kongNick');
-if(sn) document.getElementById('nickInp').value=sn;
-const urlParams=new URLSearchParams(location.search);
-if(urlParams.get('room')) document.getElementById('codeInp').value=urlParams.get('room');
+if(sn)document.getElementById('nickInp').value=sn;
+const urlP=new URLSearchParams(location.search);
+if(urlP.get('room'))document.getElementById('codeInp').value=urlP.get('room');
 setDiff('normal');
 </script>
 </body>
