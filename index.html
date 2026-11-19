@@ -91,7 +91,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 .hint{font-size:10px;color:#2a2a56;text-align:center;margin-bottom:4px;}
 
 /* CHAT */
-.chat{display:none;background:linear-gradient(145deg,#0e0e28,#080818);border:1px solid #1a1a3a;border-radius:12px;overflow:hidden;margin-top:6px;}
+.chat{display:none;background:linear-gradient(145deg,#0e0e28,#080818);border:1px solid #1a1a3a;border-radius:12px;overflow:hidden;margin-top:6px;width:100%;max-width:100%;}
 .chat.show{display:block;}
 .chat-hdr{padding:7px 12px 5px;border-bottom:1px solid #161630;display:flex;align-items:center;gap:8px;}
 .cdot{width:7px;height:7px;border-radius:50%;background:#3a3a68;flex-shrink:0;}
@@ -114,7 +114,7 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
 .qr-row{display:flex;gap:4px;padding:5px 10px;border-top:1px solid #121228;flex-wrap:wrap;}
 .qr{padding:3px 7px;border-radius:12px;font-size:10.5px;cursor:pointer;border:1px solid #181838;color:var(--text2);background:#0a0a1e;transition:all .14s;}
 .qr:hover{border-color:rgba(233,69,96,.4);color:var(--red);}
-.chat-inp-row{display:flex;gap:5px;padding:6px 10px 8px;border-top:1px solid #121228;}
+.chat-inp-row{display:flex;gap:5px;padding:6px 10px 8px;border-top:1px solid #121228;width:100%;overflow:hidden;}
 .cinp{flex:1;background:#07071e;border:1px solid #202050;border-radius:7px;padding:7px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;}
 .cinp:focus{border-color:rgba(100,80,200,.5);}
 .csend{padding:7px 12px;border-radius:7px;background:linear-gradient(135deg,#4030a0,#2a1870);border:none;color:#c0b0f0;cursor:pointer;font-size:14px;}
@@ -257,8 +257,8 @@ header{width:100%;display:flex;align-items:center;justify-content:space-between;
       <button class="qr" onclick="qr('😂 哈哈哈！')">😂哈哈</button>
     </div>
     <div class="chat-inp-row">
-      <input class="cinp" id="chatInp" placeholder="說點什麼…（Enter 送出）" maxlength="80">
-      <button class="csend" onclick="sendChat()">➤</button>
+      <input class="cinp" id="chatInp" placeholder="說點什麼…" maxlength="80">
+      <button class="csend" onclick="sendChat()" style="flex-shrink:0;white-space:nowrap;min-width:44px;">➤</button>
     </div>
   </div>
 </div>
@@ -384,8 +384,8 @@ function loop(){
   frames++;
   if(gState==='playing')tick();
   draw();
-  // 廣播給對方（每4幀，online模式）
-  if(!soloMode&&frames%4===0&&socket&&socket.connected&&gState==='playing'){
+  // 廣播給對方（每4幀，online模式，playing/win/gameover都廣播）
+  if(!soloMode&&frames%4===0&&socket&&socket.connected&&gState!=='idle'){
     const topY=platforms[platforms.length-1]?.y||0;
     const ht=Math.max(0,Math.min(100,Math.round(100*(1-(pl.y-topY)/(CH()-topY)))));
     socket.emit('state',{score,lives,level,ht,nick:myNick,state:gState});
@@ -433,10 +433,12 @@ function tick(){
   if(Math.abs(pl.x-princess.x)<40&&Math.abs(pl.y-princess.y)<48){onWin();return;}
   // 計分
   scoreTimer++;
-  if(scoreTimer%60===0){score+=10*level;updateMyHUD();}
   const topY=platforms[platforms.length-1]?.y||0;
   const ht=Math.max(0,Math.min(1,1-(pl.y-topY)/(H-topY)));
-  if(scoreTimer%12===0&&ht>.08)score+=Math.floor(ht*4);
+  // 問題1修正：只有在爬高（ht>5%）時才加時間分，站在地板不加分
+  if(scoreTimer%60===0&&ht>0.05){score+=10*level;updateMyHUD();}
+  // 高度分：只有在地板以上才加
+  if(scoreTimer%12===0&&ht>0.08)score+=Math.floor(ht*4);
   document.getElementById('myHbar').style.width=Math.round(ht*100)+'%';
 }
 
@@ -484,7 +486,11 @@ function respawn(){pl.x=14;pl.y=CH()-cellH()-pl.h;pl.vx=0;pl.vy=0;pl.onGround=fa
 function onWin(){
   const lc=LEVELS[Math.min(level-1,LEVELS.length-1)];
   score+=lc.bonus;totalScore=score;gState='win';snd('win');updateMyHUD();
-  if(!soloMode)broadcastEvent('win',`🏆 ${myNick} 以 ${score} 分完成${lc.name}！`);
+  // 立即廣播最終正確分數
+  if(!soloMode&&socket&&socket.connected){
+    socket.emit('state',{score,lives,level,ht:0,nick:myNick,state:'win'});
+    broadcastEvent('win',`🏆 ${myNick} 以 ${score} 分完成${lc.name}！`);
+  }
   if(soloMode){
     if(level>=MAX_LVL){
       showOv('🏆','全關通關！',`難度：${DIFF[curDiff].label}\n總分：${score}`,`<button class="btn btn-red" onclick="startSolo()">再挑戰</button><button class="btn" onclick="goLobby()">回大廳</button>`);
